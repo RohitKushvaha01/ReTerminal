@@ -291,6 +291,10 @@ fun Customization(modifier: Modifier = Modifier) {
             SettingsToggle(label = "Bell", description = "Play bell sound", showSwitch = true, default = Settings.bell, sideEffect = {
                 Settings.bell = it
             })
+
+            SettingsToggle(label = "Vibrate", description = "Virtual keypad vibration", showSwitch = true, default = Settings.vibrate, sideEffect = {
+                Settings.vibrate = it
+            })
         }
 
         PreferenceGroup {

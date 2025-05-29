@@ -439,16 +439,18 @@ public final class VirtualKeysView extends GridLayout {
         return;
     }
 
-    if (Settings.System.getInt(
-            getContext().getContentResolver(), Settings.System.HAPTIC_FEEDBACK_ENABLED, 0)
-        != 0) {
+    if (com.rk.settings.Settings.INSTANCE.getVibrate()) {
+      if (Settings.System.getInt(
+              getContext().getContentResolver(), Settings.System.HAPTIC_FEEDBACK_ENABLED, 0)
+              != 0) {
 
-      if (Build.VERSION.SDK_INT >= 28) {
-        button.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP);
-      } else {
-        // Perform haptic feedback only if no total silence mode enabled.
-        if (Settings.Global.getInt(getContext().getContentResolver(), "zen_mode", 0) != 2) {
+        if (Build.VERSION.SDK_INT >= 28) {
           button.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP);
+        } else {
+          // Perform haptic feedback only if no total silence mode enabled.
+          if (Settings.Global.getInt(getContext().getContentResolver(), "zen_mode", 0) != 2) {
+            button.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP);
+          }
         }
       }
     }

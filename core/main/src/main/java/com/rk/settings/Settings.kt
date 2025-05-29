@@ -59,6 +59,10 @@ object Settings {
         get() = Preference.getBoolean(key = "bell", default = false)
         set(value) = Preference.setBoolean(key = "bell",value)
 
+    var vibrate
+        get() = Preference.getBoolean(key = "vibrate", default = true)
+        set(value) = Preference.setBoolean(key = "vibrate",value)
+
     var toolbar
         get() = Preference.getBoolean(key = "toolbar", default = true)
         set(value) = Preference.setBoolean(key = "toolbar",value)
