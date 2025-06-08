@@ -2,6 +2,12 @@ set -e  # Exit immediately on Failure
 
 export PATH=/bin:/sbin:/usr/bin:/usr/sbin:/usr/share/bin:/usr/share/sbin:/usr/local/bin:/usr/local/sbin:/system/bin:/system/xbin
 export HOME=/root
+
+if [ ! -s /etc/resolv.conf ]; then
+    echo "nameserver 8.8.8.8" > /etc/resolv.conf
+fi
+
+
 cd "$XPWD"
 export PS1="\[\e[38;5;46m\]\u\[\033[39m\]@karbon \[\033[39m\]\w \[\033[0m\]\\$ "
 # shellcheck disable=SC2034
