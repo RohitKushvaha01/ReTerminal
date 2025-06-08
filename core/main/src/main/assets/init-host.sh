@@ -6,10 +6,6 @@ if [ -z "$(ls -A "$ALPINE_DIR" | grep -vE '^(root|tmp)$')" ]; then
     tar -xf "$PREFIX/files/alpine.tar.gz" -C "$ALPINE_DIR"
 fi
 
-if [ ! -s $ALPINE_DIR/etc/resolv.conf ]; then
-    echo "nameserver 8.8.8.8" > /etc/resolv.conf
-fi
-
 [ ! -e "$PREFIX/local/bin/proot" ] && cp "$PREFIX/files/proot" "$PREFIX/local/bin"
 
 for sofile in "$PREFIX/files/"*.so.2; do
