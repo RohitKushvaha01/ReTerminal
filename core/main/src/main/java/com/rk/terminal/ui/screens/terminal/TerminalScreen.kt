@@ -285,10 +285,10 @@ fun TerminalScreen(
 
                 PreferenceGroup {
                     SettingsCard(
-                        title = { Text("Alpine") },
-                        description = {Text("Alpine Linux")},
+                        title = { Text("Debian") },
+                        description = {Text("Debian GNU/Linux")},
                         onClick = {
-                           createSession(workingMode = WorkingMode.ALPINE)
+                           createSession(workingMode = WorkingMode.ALPINE) // Repurposing ALPINE for DEBIAN
                             showAddDialog = false
                         })
 
@@ -413,8 +413,8 @@ fun TerminalScreen(
 
                             fun getNameOfWorkingMode(workingMode:Int?):String{
                                 return when(workingMode){
-                                    0 -> "ALPINE".lowercase()
-                                    1 -> "ANDROID".lowercase()
+                                    WorkingMode.ALPINE -> "DEBIAN".lowercase() // Repurposed
+                                    WorkingMode.ANDROID -> "ANDROID".lowercase()
                                     null -> "null"
                                     else -> "unknown"
                                 }
