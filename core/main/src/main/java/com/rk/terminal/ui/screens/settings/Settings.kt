@@ -1,5 +1,8 @@
 package com.rk.terminal.ui.screens.settings
 
+import android.content.Intent
+import android.net.Uri
+import android.os.Build
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -27,6 +30,7 @@ import com.rk.settings.Settings
 import com.rk.terminal.ui.activities.terminal.MainActivity
 import com.rk.terminal.ui.components.SettingsToggle
 import com.rk.terminal.ui.routes.MainActivityRoutes
+import androidx.core.net.toUri
 
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -138,6 +142,34 @@ fun Settings(modifier: Modifier = Modifier,navController: NavController,mainActi
                 sideEffect = {
                     Settings.seccomp = it
                 })
+
+            SettingsToggle(
+                label = "All file access",
+                description = "enable access to /sdcard and /storage",
+                showSwitch = false,
+                default = false,
+                sideEffect = {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                        runCatching {
+                            val intent = Intent(
+                                android.provider.Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION,
+                                "package:${context.packageName}".toUri()
+                            )
+                            context.startActivity(intent)
+                        }.onFailure {
+                            val intent = Intent(android.provider.Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION)
+                            context.startActivity(intent)
+                        }
+                    }else{
+                        val intent = Intent(
+                            android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+                            "package:${context.packageName}".toUri()
+                        )
+                        context.startActivity(intent)
+                    }
+
+                })
+
         }
     }
 }
