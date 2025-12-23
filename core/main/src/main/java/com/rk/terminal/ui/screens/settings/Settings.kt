@@ -136,7 +136,7 @@ fun Settings(modifier: Modifier = Modifier,navController: NavController,mainActi
         PreferenceGroup {
             SettingsToggle(
                 label = "SECCOMP",
-                description = "fix: \"operation not permitted\" error on some devices",
+                description = "fix operation not permitted error",
                 showSwitch = true,
                 default = Settings.seccomp,
                 sideEffect = {

@@ -22,13 +22,18 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.rk.terminal.service.SessionService
 import com.rk.terminal.ui.navHosts.MainActivityNavHost
+import com.rk.terminal.ui.routes.MainActivityRoutes
 import com.rk.terminal.ui.screens.terminal.TerminalScreen
 import com.rk.terminal.ui.screens.terminal.terminalView
 import com.rk.terminal.ui.theme.KarbonTheme
@@ -53,6 +58,26 @@ class MainActivity : ComponentActivity() {
                         Surface {
                             val navController = rememberNavController()
                             MainActivityNavHost(navController = navController, mainActivity = this@MainActivity)
+
+                            val backStackEntry by navController.currentBackStackEntryAsState()
+
+                            val focusManager = LocalFocusManager.current
+                            val keyboardController = LocalSoftwareKeyboardController.current
+
+                            LaunchedEffect(backStackEntry?.destination?.route) {
+                                if (backStackEntry?.destination?.route != MainActivityRoutes.MainScreen.route) {
+                                    // 1️⃣ Clear Compose focus
+                                    focusManager.clearFocus(force = true)
+
+                                    // 2️⃣ Clear Android View focus
+                                    terminalView.get()?.clearFocus()
+
+                                    // 3️⃣ Hide IME explicitly
+                                    keyboardController?.hide()
+                                }
+                            }
+
+
                         }
                     }
                 }

@@ -16,11 +16,9 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.Info
-import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -48,7 +46,6 @@ import com.rk.libcommons.child
 import com.rk.libcommons.createFileIfNot
 import com.rk.libcommons.dpToPx
 import com.rk.settings.Settings
-import com.rk.terminal.ui.components.InfoBlock
 import com.rk.terminal.ui.components.SettingsToggle
 import com.rk.terminal.ui.navHosts.horizontal_statusBar
 import com.rk.terminal.ui.navHosts.showStatusBar
@@ -59,10 +56,14 @@ import com.rk.terminal.ui.screens.terminal.showHorizontalToolbar
 import com.rk.terminal.ui.screens.terminal.showToolbar
 import com.rk.terminal.ui.screens.terminal.showVirtualKeys
 import com.rk.terminal.ui.screens.terminal.terminalView
+import com.rk.terminal.ui.screens.terminal.wallAlpha
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
+import java.math.RoundingMode
+import java.text.DecimalFormat
+import kotlin.math.roundToInt
 
 
 private const val min_text_size = 10f
@@ -286,6 +287,27 @@ fun Customization(modifier: Modifier = Modifier) {
             )
 
         }
+
+        PreferenceGroup {
+            PreferenceTemplate(title = {
+                Text("Wallpaper Alpha")
+            }) { Text(
+                DecimalFormat("0.##")
+                .apply { roundingMode = RoundingMode.HALF_UP }
+                .format(wallAlpha)) }
+            PreferenceTemplate(title = {}){
+                Slider(
+                    value = wallAlpha,
+                    onValueChange = {
+                        wallAlpha = it
+                    },
+                    onValueChangeFinished = {
+                        Settings.wallTransparency = wallAlpha
+                    }
+                )
+            }
+        }
+
 
         PreferenceGroup {
             SettingsToggle(label = "Bell", description = "Play bell sound", showSwitch = true, default = Settings.bell, sideEffect = {

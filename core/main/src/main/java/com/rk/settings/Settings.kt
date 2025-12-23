@@ -3,15 +3,10 @@ package com.rk.settings
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.SharedPreferences
-import android.content.res.Configuration
 import android.os.Build
 import androidx.appcompat.app.AppCompatDelegate
-import androidx.compose.ui.platform.LocalContext
-import androidx.core.content.pm.PackageInfoCompat
-import com.rk.components.compose.preferences.normal.Preference
 import com.rk.libcommons.application
 import com.rk.terminal.ui.screens.settings.WorkingMode
-import java.nio.charset.Charset
 
 object Settings {
     //Boolean
@@ -42,6 +37,11 @@ object Settings {
     var terminal_font_size
         get() = Preference.getInt(key = "terminal_font_size", default = 13)
         set(value) = Preference.setInt(key = "terminal_font_size",value)
+
+    var wallTransparency
+        get() = Preference.getFloat(key = "wallTransparency", default = 0f)
+        set(value) = Preference.setFloat(key = "wallTransparency",value)
+
     var working_Mode
         get() = Preference.getInt(key = "workingMode", default = WorkingMode.ALPINE)
         set(value) = Preference.setInt(key = "workingMode",value)
