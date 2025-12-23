@@ -5,7 +5,7 @@ plugins {
 
 android {
     namespace = "com.rk.resources"
-    compileSdk = 34
+    compileSdk = 36
 
     lint.disable += "MissingTranslation"
     

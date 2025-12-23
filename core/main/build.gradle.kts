@@ -20,7 +20,7 @@ val gitCommitDate: Provider<String> =
 android {
     namespace = "com.rk.terminal"
     android.buildFeatures.buildConfig = true
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         minSdk = 24
@@ -92,6 +92,8 @@ dependencies {
     api(libs.okhttp)
     api(libs.anrwatchdog)
     api(libs.androidx.material.icons.core)
+    api(libs.androidx.palette)
+    api(libs.accompanist.systemuicontroller)
 //    api(libs.termux.shared)
 
     api(project(":core:resources"))
