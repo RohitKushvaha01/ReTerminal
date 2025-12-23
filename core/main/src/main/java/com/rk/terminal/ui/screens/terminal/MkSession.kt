@@ -85,6 +85,10 @@ object MkSession {
                 env.add("PROOT_LOADER=${applicationInfo.nativeLibraryDir}/libproot-loader.so")
             }
 
+            if (Settings.seccomp) {
+                env.add("SECCOMP=1")
+            }
+
 
 
 

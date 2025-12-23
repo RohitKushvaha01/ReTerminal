@@ -128,5 +128,16 @@ fun Settings(modifier: Modifier = Modifier,navController: NavController,mainActi
                 Icon(imageVector = Icons.AutoMirrored.Outlined.KeyboardArrowRight, contentDescription = null,modifier = Modifier.padding(16.dp))
             })
         }
+
+        PreferenceGroup {
+            SettingsToggle(
+                label = "SECCOMP",
+                description = "fix: \"operation not permitted\" error on some devices",
+                showSwitch = true,
+                default = Settings.seccomp,
+                sideEffect = {
+                    Settings.seccomp = it
+                })
+        }
     }
 }

@@ -6,32 +6,15 @@ plugins {
     alias(libs.plugins.compose.compiler)
 }
 
-fun getGitCommitHash(): String {
-    val stdout = ByteArrayOutputStream()
-    exec {
-        commandLine("git", "rev-parse", "--short=8", "HEAD")
-        standardOutput = stdout
-    }
-    return stdout.toString().trim()
-}
+val gitCommitHash: Provider<String> =
+    providers.exec { commandLine("git", "rev-parse", "--short=8", "HEAD") }.standardOutput.asText.map { it.trim() }
 
-fun getGitCommitDate(): String {
-    val stdout = ByteArrayOutputStream()
-    exec {
-        commandLine("git", "show", "-s", "--format=%cI", "HEAD")
-        standardOutput = stdout
-    }
-    return stdout.toString().trim()
-}
+val fullGitCommitHash: Provider<String> =
+    providers.exec { commandLine("git", "rev-parse", "HEAD") }.standardOutput.asText.map { it.trim() }
 
-fun getFullGitCommitHash(): String {
-    val stdout = ByteArrayOutputStream()
-    exec {
-        commandLine("git", "rev-parse", "HEAD")
-        standardOutput = stdout
-    }
-    return stdout.toString().trim()
-}
+val gitCommitDate: Provider<String> =
+    providers.exec { commandLine("git", "show", "-s", "--format=%cI", "HEAD") }.standardOutput.asText.map { it.trim() }
+
 
 
 android {
@@ -47,9 +30,10 @@ android {
 
     buildTypes {
         release {
-            buildConfigField("String", "GIT_COMMIT_HASH", "\"${getFullGitCommitHash()}\"")
-            buildConfigField("String", "GIT_SHORT_COMMIT_HASH", "\"${getGitCommitHash()}\"")
-            buildConfigField("String", "GIT_COMMIT_DATE", "\"${getGitCommitDate()}\"")
+            buildConfigField("String", "GIT_COMMIT_HASH", "\"${fullGitCommitHash.get()}\"")
+            buildConfigField("String", "GIT_SHORT_COMMIT_HASH", "\"${gitCommitHash.get()}\"")
+            buildConfigField("String", "GIT_COMMIT_DATE", "\"${gitCommitDate.get()}\"")
+
             isMinifyEnabled = false
             isShrinkResources = false
             proguardFiles(
@@ -57,9 +41,9 @@ android {
             )
         }
         debug{
-            buildConfigField("String", "GIT_COMMIT_HASH", "\"${getFullGitCommitHash()}\"")
-            buildConfigField("String", "GIT_SHORT_COMMIT_HASH", "\"${getGitCommitHash()}\"")
-            buildConfigField("String", "GIT_COMMIT_DATE", "\"${getGitCommitDate()}\"")
+            buildConfigField("String", "GIT_COMMIT_HASH", "\"${fullGitCommitHash.get()}\"")
+            buildConfigField("String", "GIT_SHORT_COMMIT_HASH", "\"${gitCommitHash.get()}\"")
+            buildConfigField("String", "GIT_COMMIT_DATE", "\"${gitCommitDate.get()}\"")
         }
     }
 
@@ -90,11 +74,9 @@ dependencies {
     api(libs.constraintlayout)
     api(libs.navigation.fragment)
     api(libs.navigation.ui)
-    api(libs.asynclayoutinflater)
     api(libs.navigation.fragment.ktx)
     api(libs.navigation.ui.ktx)
     api(libs.activity)
-    api(libs.lifecycle.livedata.ktx)
     api(libs.lifecycle.viewmodel.ktx)
     api(libs.lifecycle.runtime.ktx)
     api(libs.activity.compose)
@@ -109,8 +91,7 @@ dependencies {
     //api(libs.commons.net)
     api(libs.okhttp)
     api(libs.anrwatchdog)
-    api(libs.androidx.palette)
-    api(libs.accompanist.systemuicontroller)
+    api(libs.androidx.material.icons.core)
 //    api(libs.termux.shared)
 
     api(project(":core:resources"))
