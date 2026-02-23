@@ -80,11 +80,11 @@ fun Settings(modifier: Modifier = Modifier,navController: NavController,mainActi
     var selectedOption by remember { mutableIntStateOf(Settings.working_Mode) }
 
     PreferenceLayout(label = stringResource(strings.settings)) {
-        PreferenceGroup(heading = "Default Working mode") {
+        PreferenceGroup(heading = stringResource(strings.default_working_mode)) {
 
             SettingsCard(
                 title = { Text("Alpine") },
-                description = {Text("Alpine Linux")},
+                description = {Text(stringResource(strings.alpine_desc))},
                 startWidget = {
                     RadioButton(
                         modifier = Modifier.padding(start = 8.dp),
@@ -102,7 +102,7 @@ fun Settings(modifier: Modifier = Modifier,navController: NavController,mainActi
 
             SettingsCard(
                 title = { Text("Android") },
-                description = {Text("ReTerminal Android shell")},
+                description = {Text(stringResource(strings.android_desc))},
                 startWidget = {
                     RadioButton(
                         modifier = Modifier
@@ -123,7 +123,7 @@ fun Settings(modifier: Modifier = Modifier,navController: NavController,mainActi
 
         PreferenceGroup {
             SettingsToggle(
-                label = "Customizations",
+                label = stringResource(strings.customizations),
                 showSwitch = false,
                 default = false,
                 sideEffect = {
@@ -135,8 +135,8 @@ fun Settings(modifier: Modifier = Modifier,navController: NavController,mainActi
 
         PreferenceGroup {
             SettingsToggle(
-                label = "SECCOMP",
-                description = "fix operation not permitted error",
+                label = stringResource(strings.seccomp),
+                description = stringResource(strings.seccomp_desc),
                 showSwitch = true,
                 default = Settings.seccomp,
                 sideEffect = {
@@ -144,8 +144,8 @@ fun Settings(modifier: Modifier = Modifier,navController: NavController,mainActi
                 })
 
             SettingsToggle(
-                label = "All file access",
-                description = "enable access to /sdcard and /storage",
+                label = stringResource(strings.all_file_access),
+                description = stringResource(strings.all_file_access_desc),
                 showSwitch = false,
                 default = false,
                 sideEffect = {

@@ -79,8 +79,10 @@ import androidx.core.view.WindowCompat
 import androidx.core.widget.doOnTextChanged
 import androidx.navigation.NavController
 import com.google.android.material.R
+import androidx.compose.ui.res.stringResource
 import com.rk.components.compose.preferences.base.PreferenceGroup
 import com.rk.libcommons.application
+import com.rk.resources.strings
 import com.rk.libcommons.child
 import com.rk.libcommons.dpToPx
 import com.rk.libcommons.localDir
@@ -265,7 +267,7 @@ fun TerminalScreen(
                 PreferenceGroup {
                     SettingsCard(
                         title = { Text("Alpine") },
-                        description = {Text("Alpine Linux")},
+                        description = {Text(stringResource(strings.alpine_desc))},
                         onClick = {
                            createSession(workingMode = WorkingMode.ALPINE)
                             showAddDialog = false
@@ -273,7 +275,7 @@ fun TerminalScreen(
 
                     SettingsCard(
                         title = { Text("Android") },
-                        description = {Text("ReTerminal Android shell")},
+                        description = {Text(stringResource(strings.android_desc))},
                         onClick = {
                             createSession(workingMode = WorkingMode.ANDROID)
                             showAddDialog = false
@@ -299,7 +301,7 @@ fun TerminalScreen(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Text(
-                                text = "Session",
+                                text = stringResource(strings.session),
                                 style = MaterialTheme.typography.titleLarge
                             )
 
@@ -408,7 +410,7 @@ fun TerminalScreen(
                                     ),
                                     title = {
                                         Column {
-                                            Text(text = "ReTerminal",color = color)
+                                            Text(text = "ReTerminal", color = color)
                                             Text(style = MaterialTheme.typography.bodySmall,text = mainActivityActivity.sessionBinder?.getService()?.currentSession?.value?.first + " (${getNameOfWorkingMode(mainActivityActivity.sessionBinder?.getService()?.currentSession?.value?.second)})",color = color)
                                         }
                                     },

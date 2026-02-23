@@ -7,8 +7,10 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
+import com.rk.resources.strings
 
 @Composable
 fun InputDialog(
@@ -49,11 +51,11 @@ fun InputDialog(
                     onDismiss()
                 }
             ) {
-                Text("Apply")
+                Text(stringResource(strings.apply))
             }
         },
         dismissButton = {
-            OutlinedButton(onClick = { onDismiss() }) { Text("Cancel") }
+            OutlinedButton(onClick = { onDismiss() }) { Text(stringResource(strings.cancel)) }
         },
     )
 }

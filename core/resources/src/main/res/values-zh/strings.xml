@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="settings">设置</string>
+    <string name="use_shizuku">自动登录 Shizuku</string>
+    <string name="use_shizuku_desc">自动执行 rish 命令</string>
+    <string name="default_working_mode">默认工作模式</string>
+    <string name="alpine_desc">Alpine Linux</string>
+    <string name="android_desc">ReTerminal Android Shell</string>
+    <string name="customizations">自定义</string>
+    <string name="seccomp">SECCOMP</string>
+    <string name="seccomp_desc">修复"操作不被允许"错误</string>
+    <string name="all_file_access">完整文件访问</string>
+    <string name="all_file_access_desc">启用对 /sdcard 和 /storage 的访问</string>
+    <string name="text_size">文字大小</string>
+    <string name="font_hint">仅支持等宽字体，非等宽字体可能无法正确渲染。</string>
+    <string name="no_font_selected">未选择字体</string>
+    <string name="custom_font">自定义字体</string>
+    <string name="no_image_selected">未选择图片</string>
+    <string name="custom_background">自定义背景</string>
+    <string name="wallpaper_alpha">壁纸透明度</string>
+    <string name="bell">响铃</string>
+    <string name="bell_desc">播放提示音</string>
+    <string name="vibrate">振动</string>
+    <string name="vibrate_desc">虚拟键盘振动反馈</string>
+    <string name="statusbar">状态栏</string>
+    <string name="statusbar_desc">显示状态栏</string>
+    <string name="horizontal_statusbar">横屏状态栏</string>
+    <string name="horizontal_statusbar_desc">横屏模式下显示状态栏</string>
+    <string name="attention">注意</string>
+    <string name="toolbar_warning">关闭工具栏可能导致某些设备无法打开抽屉菜单。如果发生这种情况，需要清除应用数据来修复。</string>
+    <string name="titlebar">标题栏</string>
+    <string name="titlebar_desc">显示标题栏</string>
+    <string name="horizontal_titlebar">横屏标题栏</string>
+    <string name="horizontal_titlebar_desc">横屏模式下显示工具栏</string>
+    <string name="virtual_keys">虚拟按键</string>
+    <string name="virtual_keys_desc">在终端下方显示虚拟按键</string>
+    <string name="hide_soft_keyboard">隐藏软键盘</string>
+    <string name="hide_soft_keyboard_desc">连接硬件键盘时隐藏虚拟键盘</string>
+    <string name="session">会话</string>
+    <string name="apply">应用</string>
+    <string name="cancel">取消</string>
+    <string name="installing">安装中</string>
+    <string name="downloading">下载中.. %1$d%%</string>
+    <string name="network_error">网络错误</string>
+    <string name="setup_failed">安装失败：%1$s</string>
+</resources>

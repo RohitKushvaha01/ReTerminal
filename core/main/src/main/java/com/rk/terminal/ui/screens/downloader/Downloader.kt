@@ -9,9 +9,11 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.rk.libcommons.*
+import com.rk.resources.strings
 import com.rk.terminal.ui.activities.terminal.MainActivity
 import com.rk.terminal.ui.screens.terminal.Rootfs
 import com.rk.terminal.ui.screens.terminal.TerminalScreen
@@ -31,7 +33,10 @@ fun Downloader(
 ) {
     val context = LocalContext.current
     var progress by remember { mutableFloatStateOf(0f) }
-    var progressText by remember { mutableStateOf("Installing") }
+    val installingStr = stringResource(strings.installing)
+    val networkErrorStr = stringResource(strings.network_error)
+    val setupFailedStr = stringResource(strings.setup_failed)
+    var progressText by remember { mutableStateOf(installingStr) }
     var isSetupComplete by remember { mutableStateOf(false) }
     var needsDownload by remember { mutableStateOf(false) }
 
@@ -62,11 +67,11 @@ fun Downloader(
                     isSetupComplete = true
                 },
                 onError = { error ->
-                    toast(if (error is UnknownHostException) "Network Error" else "Setup Failed: ${error.message}")
+                    toast(if (error is UnknownHostException) networkErrorStr else setupFailedStr.format(error.message))
                 }
             )
         } catch (e: Exception) {
-            toast(if (e is UnknownHostException) "Network Error" else "Setup Failed: ${e.message}")
+            toast(if (e is UnknownHostException) networkErrorStr else setupFailedStr.format(e.message))
         }
     }
 

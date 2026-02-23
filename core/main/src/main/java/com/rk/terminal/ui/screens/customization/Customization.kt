@@ -38,10 +38,12 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.palette.graphics.Palette
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import androidx.compose.ui.res.stringResource
 import com.rk.components.compose.preferences.base.PreferenceGroup
 import com.rk.components.compose.preferences.base.PreferenceLayout
 import com.rk.components.compose.preferences.base.PreferenceTemplate
 import com.rk.components.compose.preferences.switch.PreferenceSwitch
+import com.rk.resources.strings
 import com.rk.libcommons.child
 import com.rk.libcommons.createFileIfNot
 import com.rk.libcommons.dpToPx
@@ -73,10 +75,10 @@ private const val max_text_size = 20f
 fun Customization(modifier: Modifier = Modifier) {
     val context = LocalContext.current
 
-    PreferenceLayout(label = "Customizations") {
+    PreferenceLayout(label = stringResource(strings.customizations)) {
         var sliderPosition by remember { mutableFloatStateOf(Settings.terminal_font_size.toFloat()) }
         PreferenceGroup {
-            PreferenceTemplate(title = { Text("Text Size") }) {
+            PreferenceTemplate(title = { Text(stringResource(strings.text_size)) }) {
                 Text(sliderPosition.toInt().toString())
             }
             PreferenceTemplate(title = {}) {
@@ -124,7 +126,7 @@ fun Customization(modifier: Modifier = Modifier) {
                     Icon(imageVector = Icons.Outlined.Info, contentDescription = null)
                 }
                 Text(
-                    text = "Only monospaced fonts are supported. Non-monospaced fonts may not render correctly.",
+                    text = stringResource(strings.font_hint),
                     style = MaterialTheme.typography.bodySmall,
                     modifier = Modifier.padding(start = 8.dp)
                 )
@@ -134,8 +136,9 @@ fun Customization(modifier: Modifier = Modifier) {
             val font by remember { mutableStateOf<File>(context.filesDir.child("font.ttf")) }
             var fontExists by remember { mutableStateOf(font.exists()) }
 
+            val noFontSelected = stringResource(strings.no_font_selected)
             var fontName by remember { mutableStateOf(if (!fontExists || !font.canRead()){
-                "No Font Selected"
+                noFontSelected
             }else{
                 Settings.custom_font_name
             }) }
@@ -169,7 +172,7 @@ fun Customization(modifier: Modifier = Modifier) {
                     }
                 }),
                 title = {
-                    Text("Custom Font")
+                    Text(stringResource(strings.custom_font))
                 },
                 description = {
                     Text(fontName)
@@ -179,8 +182,8 @@ fun Customization(modifier: Modifier = Modifier) {
                         IconButton(onClick = {
                             scope.launch{
                                 font.delete()
-                                fontName = "No Font Selected"
-                                Settings.custom_font_name = "No Font Selected"
+                                fontName = noFontSelected
+                                Settings.custom_font_name = noFontSelected
                                 setFont(Typeface.MONOSPACE)
                                 fontExists = font.exists()
                             }
@@ -202,8 +205,9 @@ fun Customization(modifier: Modifier = Modifier) {
 
 
 
+            val noImageSelected = stringResource(strings.no_image_selected)
             var backgroundName by remember { mutableStateOf(if (!imageExists || !image.canRead()){
-                "No Image Selected"
+                noImageSelected
             }else{
                 Settings.custom_background_name
             }) }
@@ -261,7 +265,7 @@ fun Customization(modifier: Modifier = Modifier) {
                     }
                 }),
                 title = {
-                    Text("Custom Background")
+                    Text(stringResource(strings.custom_background))
                 },
                 description = {
                     Text(backgroundName)
@@ -272,8 +276,8 @@ fun Customization(modifier: Modifier = Modifier) {
                         IconButton(onClick = {
                             scope.launch{
                                 image.delete()
-                                Settings.custom_background_name = "No Image Selected"
-                                backgroundName = "No Image Selected"
+                                Settings.custom_background_name = noImageSelected
+                                backgroundName = noImageSelected
                                 darkText.value = !darkMode
                                 imageExists = image.exists()
                                 bitmap.value = null
@@ -290,7 +294,7 @@ fun Customization(modifier: Modifier = Modifier) {
 
         PreferenceGroup {
             PreferenceTemplate(title = {
-                Text("Wallpaper Alpha")
+                Text(stringResource(strings.wallpaper_alpha))
             }) { Text(
                 DecimalFormat("0.##")
                 .apply { roundingMode = RoundingMode.HALF_UP }
@@ -310,19 +314,19 @@ fun Customization(modifier: Modifier = Modifier) {
 
 
         PreferenceGroup {
-            SettingsToggle(label = "Bell", description = "Play bell sound", showSwitch = true, default = Settings.bell, sideEffect = {
+            SettingsToggle(label = stringResource(strings.bell), description = stringResource(strings.bell_desc), showSwitch = true, default = Settings.bell, sideEffect = {
                 Settings.bell = it
             })
 
-            SettingsToggle(label = "Vibrate", description = "Virtual keypad vibration", showSwitch = true, default = Settings.vibrate, sideEffect = {
+            SettingsToggle(label = stringResource(strings.vibrate), description = stringResource(strings.vibrate_desc), showSwitch = true, default = Settings.vibrate, sideEffect = {
                 Settings.vibrate = it
             })
         }
 
         PreferenceGroup {
             SettingsToggle(
-                label = "StatusBar",
-                description = "Show statusbar",
+                label = stringResource(strings.statusbar),
+                description = stringResource(strings.statusbar_desc),
                 showSwitch = true,
                 default = Settings.statusBar, sideEffect = {
                     Settings.statusBar = it
@@ -330,8 +334,8 @@ fun Customization(modifier: Modifier = Modifier) {
                 })
 
             SettingsToggle(
-                label = "Horizontal StatusBar",
-                description = "Show statusbar in horizontal mode",
+                label = stringResource(strings.horizontal_statusbar),
+                description = stringResource(strings.horizontal_statusbar_desc),
                 showSwitch = true,
                 default = Settings.horizontal_statusBar, sideEffect = {
                     Settings.horizontal_statusBar = it
@@ -339,16 +343,19 @@ fun Customization(modifier: Modifier = Modifier) {
                 })
 
 
+            val attentionTitle = stringResource(strings.attention)
+            val toolbarWarning = stringResource(strings.toolbar_warning)
+            val cancelStr = stringResource(strings.cancel)
             val sideEffect:(Boolean)-> Unit = {
                 if (!it && showToolbar.value){
                     MaterialAlertDialogBuilder(context).apply {
-                        setTitle("Attention")
-                        setMessage("Turning off the toolbar may prevent the drawer from opening on some devices. If this happens, you'll need to clear the app data to fix it.");
+                        setTitle(attentionTitle)
+                        setMessage(toolbarWarning)
                         setPositiveButton("OK"){_,_ ->
                             Settings.toolbar = it
                             showToolbar.value = it
                         }
-                        setNegativeButton("Cancel",null)
+                        setNegativeButton(cancelStr,null)
                         show()
                     }
                 }else{
@@ -363,25 +370,25 @@ fun Customization(modifier: Modifier = Modifier) {
                 onCheckedChange = {
                     sideEffect.invoke(it)
                 },
-                label = "TitleBar",
+                label = stringResource(strings.titlebar),
                 modifier = modifier,
-                description = "Show titlebar",
+                description = stringResource(strings.titlebar_desc),
                 onClick = {
                     sideEffect.invoke(!showToolbar.value)
                 })
 
             SettingsToggle(
                 isEnabled = showToolbar.value,
-                label = "Horizontal TitleBar",
-                description = "Show ToolBar in horizontal mode",
+                label = stringResource(strings.horizontal_titlebar),
+                description = stringResource(strings.horizontal_titlebar_desc),
                 showSwitch = true,
                 default = Settings.toolbar_in_horizontal, sideEffect = {
                     Settings.toolbar_in_horizontal = it
                     showHorizontalToolbar.value = it
                 })
             SettingsToggle(
-                label = "Virtual Keys",
-                description = "Show virtual keys below terminal",
+                label = stringResource(strings.virtual_keys),
+                description = stringResource(strings.virtual_keys_desc),
                 showSwitch = true,
                 default = Settings.virtualKeys, sideEffect = {
                     Settings.virtualKeys = it
@@ -389,8 +396,8 @@ fun Customization(modifier: Modifier = Modifier) {
                 })
 
             SettingsToggle(
-                label = "Hide soft Keyboard",
-                description = "Hide virtual keyboard if hardware keyboard is connected",
+                label = stringResource(strings.hide_soft_keyboard),
+                description = stringResource(strings.hide_soft_keyboard_desc),
                 showSwitch = true,
                 default = Settings.hide_soft_keyboard_if_hwd, sideEffect = {
                     Settings.hide_soft_keyboard_if_hwd = it
