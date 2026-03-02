@@ -18,4 +18,12 @@
     <string name="shortcut_capture_title">اضغط على مجموعة مفاتيح</string>
     <string name="shortcut_capture_hint">في انتظار الإدخال…</string>
     <string name="shortcut_clear">مسح</string>
+    <string name="input_mode">وضع الإدخال</string>
+    <string name="input_mode_desc">تكوين طريقة تواصل الطرفية مع أساليب الإدخال</string>
+    <string name="input_mode_default">افتراضي (موصى به)</string>
+    <string name="input_mode_default_desc">متوافق مع جميع أساليب الإدخال بما في ذلك CJK</string>
+    <string name="input_mode_type_null">وضع طرفية صارم</string>
+    <string name="input_mode_type_null_desc">صحيح دلاليًا ولكن قد يتعطل بعض أساليب الإدخال</string>
+    <string name="input_mode_visible_password">وضع التوافق القديم</string>
+    <string name="input_mode_visible_password_desc">يصلح مشكلة صدى لوحة مفاتيح سامسونج؛ قد يعطل إدخال CJK في Gboard</string>
 </resources>
