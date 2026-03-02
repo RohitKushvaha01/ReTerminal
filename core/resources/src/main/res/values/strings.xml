@@ -43,4 +43,19 @@
     <string name="downloading">Downloading.. %1$d%%</string>
     <string name="network_error">Network Error</string>
     <string name="setup_failed">Setup Failed: %1$s</string>
+    <string name="keyboard_shortcuts">Keyboard Shortcuts</string>
+    <string name="keyboard_shortcuts_desc">Enable keyboard shortcuts</string>
+    <string name="shortcut_paste">Paste</string>
+    <string name="shortcut_paste_desc">Paste clipboard content</string>
+    <string name="shortcut_new_session">New Session</string>
+    <string name="shortcut_new_session_desc">Create a new terminal session</string>
+    <string name="shortcut_close_session">Close Session</string>
+    <string name="shortcut_close_session_desc">Close current terminal session</string>
+    <string name="shortcut_switch_prev">Previous Session</string>
+    <string name="shortcut_switch_prev_desc">Switch to previous session</string>
+    <string name="shortcut_switch_next">Next Session</string>
+    <string name="shortcut_switch_next_desc">Switch to next session</string>
+    <string name="shortcut_capture_title">Press a key combination</string>
+    <string name="shortcut_capture_hint">Waiting for input…</string>
+    <string name="shortcut_clear">Clear</string>
 </resources>

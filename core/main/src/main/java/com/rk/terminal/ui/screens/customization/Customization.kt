@@ -59,6 +59,8 @@ import com.rk.terminal.ui.screens.terminal.showToolbar
 import com.rk.terminal.ui.screens.terminal.showVirtualKeys
 import com.rk.terminal.ui.screens.terminal.terminalView
 import com.rk.terminal.ui.screens.terminal.wallAlpha
+import com.rk.terminal.ui.screens.terminal.ShortcutAction
+import com.rk.terminal.ui.screens.terminal.ShortcutCaptureDialog
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -403,6 +405,59 @@ fun Customization(modifier: Modifier = Modifier) {
                     Settings.hide_soft_keyboard_if_hwd = it
                 })
 
+        }
+
+        // Keyboard Shortcuts
+        PreferenceGroup(heading = stringResource(strings.keyboard_shortcuts)) {
+            var shortcutsEnabled by remember { mutableStateOf(Settings.shortcuts_enabled) }
+            var showCaptureFor by remember { mutableStateOf<ShortcutAction?>(null) }
+
+            SettingsToggle(
+                label = stringResource(strings.keyboard_shortcuts),
+                description = stringResource(strings.keyboard_shortcuts_desc),
+                showSwitch = true,
+                default = Settings.shortcuts_enabled,
+                sideEffect = {
+                    Settings.shortcuts_enabled = it
+                    shortcutsEnabled = it
+                })
+
+            for (action in ShortcutAction.entries) {
+                val binding = Settings.getShortcutBinding(action)
+                val labelRes = when (action) {
+                    ShortcutAction.PASTE -> strings.shortcut_paste
+                    ShortcutAction.NEW_SESSION -> strings.shortcut_new_session
+                    ShortcutAction.CLOSE_SESSION -> strings.shortcut_close_session
+                    ShortcutAction.SWITCH_SESSION_PREV -> strings.shortcut_switch_prev
+                    ShortcutAction.SWITCH_SESSION_NEXT -> strings.shortcut_switch_next
+                }
+                val descRes = when (action) {
+                    ShortcutAction.PASTE -> strings.shortcut_paste_desc
+                    ShortcutAction.NEW_SESSION -> strings.shortcut_new_session_desc
+                    ShortcutAction.CLOSE_SESSION -> strings.shortcut_close_session_desc
+                    ShortcutAction.SWITCH_SESSION_PREV -> strings.shortcut_switch_prev_desc
+                    ShortcutAction.SWITCH_SESSION_NEXT -> strings.shortcut_switch_next_desc
+                }
+                SettingsToggle(
+                    isEnabled = shortcutsEnabled,
+                    label = stringResource(labelRes),
+                    description = "${stringResource(descRes)} (${binding.toDisplayString()})",
+                    showSwitch = false,
+                    default = false,
+                    sideEffect = { showCaptureFor = action },
+                )
+            }
+
+            if (showCaptureFor != null) {
+                ShortcutCaptureDialog(
+                    action = showCaptureFor!!,
+                    onDismiss = { showCaptureFor = null },
+                    onConfirm = { binding ->
+                        Settings.setShortcutBinding(showCaptureFor!!, binding)
+                        showCaptureFor = null
+                    },
+                )
+            }
         }
 
 
