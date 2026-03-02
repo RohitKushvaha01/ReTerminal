@@ -72,12 +72,19 @@ object WorkingMode{
     const val ANDROID = 1
 }
 
+object InputMode {
+    const val DEFAULT = 0
+    const val TYPE_NULL = 1
+    const val VISIBLE_PASSWORD = 2
+}
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun Settings(modifier: Modifier = Modifier,navController: NavController,mainActivity: MainActivity) {
     val context = LocalContext.current
     var selectedOption by remember { mutableIntStateOf(Settings.working_Mode) }
+    var selectedInputMode by remember { mutableIntStateOf(Settings.input_mode) }
 
     PreferenceLayout(label = stringResource(strings.settings)) {
         PreferenceGroup(heading = stringResource(strings.default_working_mode)) {
@@ -117,6 +124,60 @@ fun Settings(modifier: Modifier = Modifier,navController: NavController,mainActi
                 onClick = {
                     selectedOption = WorkingMode.ANDROID
                     Settings.working_Mode = selectedOption
+                })
+        }
+
+        PreferenceGroup(heading = stringResource(strings.input_mode)) {
+
+            SettingsCard(
+                title = { Text(stringResource(strings.input_mode_default)) },
+                description = { Text(stringResource(strings.input_mode_default_desc)) },
+                startWidget = {
+                    RadioButton(
+                        modifier = Modifier.padding(start = 8.dp),
+                        selected = selectedInputMode == InputMode.DEFAULT,
+                        onClick = {
+                            selectedInputMode = InputMode.DEFAULT
+                            Settings.input_mode = selectedInputMode
+                        })
+                },
+                onClick = {
+                    selectedInputMode = InputMode.DEFAULT
+                    Settings.input_mode = selectedInputMode
+                })
+
+            SettingsCard(
+                title = { Text(stringResource(strings.input_mode_type_null)) },
+                description = { Text(stringResource(strings.input_mode_type_null_desc)) },
+                startWidget = {
+                    RadioButton(
+                        modifier = Modifier.padding(start = 8.dp),
+                        selected = selectedInputMode == InputMode.TYPE_NULL,
+                        onClick = {
+                            selectedInputMode = InputMode.TYPE_NULL
+                            Settings.input_mode = selectedInputMode
+                        })
+                },
+                onClick = {
+                    selectedInputMode = InputMode.TYPE_NULL
+                    Settings.input_mode = selectedInputMode
+                })
+
+            SettingsCard(
+                title = { Text(stringResource(strings.input_mode_visible_password)) },
+                description = { Text(stringResource(strings.input_mode_visible_password_desc)) },
+                startWidget = {
+                    RadioButton(
+                        modifier = Modifier.padding(start = 8.dp),
+                        selected = selectedInputMode == InputMode.VISIBLE_PASSWORD,
+                        onClick = {
+                            selectedInputMode = InputMode.VISIBLE_PASSWORD
+                            Settings.input_mode = selectedInputMode
+                        })
+                },
+                onClick = {
+                    selectedInputMode = InputMode.VISIBLE_PASSWORD
+                    Settings.input_mode = selectedInputMode
                 })
         }
 
