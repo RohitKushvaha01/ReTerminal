@@ -2,8 +2,6 @@ package com.rk.terminal.ui.screens.terminal.virtualkeys
 
 import android.view.View
 import android.widget.Button
-import com.blankj.utilcode.util.ClipboardUtils
-import com.rk.terminal.ui.screens.terminal.terminalView
 import com.termux.terminal.TerminalSession
 
 class VirtualKeysListener(val session: TerminalSession) : VirtualKeysView.IVirtualKeysView {
@@ -28,13 +26,6 @@ class VirtualKeysListener(val session: TerminalSession) : VirtualKeysView.IVirtu
                 "HOME" -> "\u001B[H" // Escape sequence for Home
                 "END" -> "\u001B[F" // Escape sequence for End
                 "ESC" -> "\u001B" // Escape
-                "PASTE" -> {
-                    val clip = ClipboardUtils.getText()?.toString()
-                    if (!clip.isNullOrBlank()) {
-                        terminalView.get()?.mEmulator?.paste(clip)
-                    }
-                    return
-                }
                 else -> key
             }
 

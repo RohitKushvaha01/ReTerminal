@@ -145,7 +145,11 @@ class TerminalBackEnd(val terminal: TerminalView,val activity: MainActivity) : T
     }
     
     override fun shouldEnforceCharBasedInput(): Boolean {
-        return true
+        return Settings.input_mode != 1 // TYPE_NULL mode uses TYPE_NULL inputType
+    }
+
+    override fun getInputMode(): Int {
+        return Settings.input_mode
     }
     
     override fun shouldUseCtrlSpaceWorkaround(): Boolean {

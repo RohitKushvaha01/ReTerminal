@@ -9,7 +9,6 @@ Download the latest APK from the [Releases Section](https://github.com/RohitKush
 - [x] Multiple Sessions
 - [x] Alpine Linux support
 - [x] Configurable Keyboard Shortcuts (Paste, Session Management)
-- [x] Touchscreen Paste Button
 
 # Screenshots
 <div>
