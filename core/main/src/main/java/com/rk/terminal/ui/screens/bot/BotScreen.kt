@@ -14,18 +14,21 @@ import com.rk.terminal.ui.screens.terminal.TerminalBackEnd
 import com.rk.terminal.ui.screens.terminal.changeSession
 import com.rk.terminal.ui.screens.terminal.terminalView
 import com.rk.settings.Settings
+import com.termux.view.TerminalView
 
 @Composable
 fun BotScreen(
     mainActivity: MainActivity,
     navController: NavHostController
 ) {
+    val context = mainActivity
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Text("FileStreamBot Control", style = MaterialTheme.typography.headlineMedium)
             Spacer(modifier = Modifier.height(32.dp))
             Button(onClick = {
                 startBot(mainActivity)
+                navController.navigate(MainActivityRoutes.MainScreen.route)
             }) {
                 Text("Iniciar servidor")
             }
@@ -56,7 +59,8 @@ fun startBot(mainActivity: MainActivity) {
     env["BIND_ADDRESS"] = Settings.bot_bind_addr
     env["PORT"] = Settings.bot_port
 
-    val client = TerminalBackEnd(terminalView.get()!!, mainActivity)
+    val terminalViewInstance = terminalView.get() ?: TerminalView(mainActivity, null)
+    val client = TerminalBackEnd(terminalViewInstance, mainActivity)
     mainActivity.sessionBinder!!.createSession(
         sessionId,
         client,

@@ -47,25 +47,32 @@ fun SetupScreen(
                 "Configurando ambiente" to {
                     setupBasicEnv(mainActivity)
                 },
-                "Instalando Python e Git" to {
-                    runInAlpine(mainActivity, "apk update && apk add bash gcompat glib nano python3 py3-pip git build-base python3-dev libffi-dev openssl-dev")
+                "Atualizando repositórios" to {
+                    runInAlpine(mainActivity, "apk update") { line -> progressText = "apk: $line" }
+                },
+                "Instalando dependências do sistema" to {
+                    runInAlpine(mainActivity, "apk add bash gcompat glib nano python3 py3-pip git build-base python3-dev libffi-dev openssl-dev") { line -> progressText = "apk: $line" }
                 },
                 "Clonando FileStreamBot" to {
-                    runInAlpine(mainActivity, "git clone https://github.com/TheCaduceus/FileStreamBot.git /root/FileStreamBot")
+                    runInAlpine(mainActivity, "git clone https://github.com/TheCaduceus/FileStreamBot.git /root/FileStreamBot") { line -> progressText = "git: $line" }
                 },
                 "Instalando dependências do Bot" to {
-                    runInAlpine(mainActivity, "cd /root/FileStreamBot && pip3 install -r requirements.txt")
+                    runInAlpine(mainActivity, "cd /root/FileStreamBot && pip3 install -r requirements.txt") { line -> progressText = "pip: $line" }
                 }
             )
 
             steps.forEachIndexed { index, (label, action) ->
-                progressText = label
-                progress = index.toFloat() / steps.size
+                val baseProgress = index.toFloat() / steps.size
+                val nextProgress = (index + 1).toFloat() / steps.size
+
+                // We use a simplified sub-progress for long actions
                 withContext(Dispatchers.IO) { action() }
+                progress = nextProgress
             }
 
             progress = 1f
             progressText = "Concluído!"
+            Rootfs.isDownloaded.value = true
 
             navController.navigate(MainActivityRoutes.BotScreen.route) {
                 popUpTo(MainActivityRoutes.MainScreen.route) { inclusive = true }
@@ -143,13 +150,11 @@ private fun setupBasicEnv(activity: MainActivity) {
     }
 }
 
-private fun runInAlpine(activity: MainActivity, command: String) {
+private suspend fun runInAlpine(activity: MainActivity, command: String, onLine: (String) -> Unit) {
     val binDir = localBinDir()
     val libDir = localLibDir()
-    val prefix = activity.filesDir.parentFile!!.path
     val linker = if (File("/system/bin/linker64").exists()) "/system/bin/linker64" else "/system/bin/linker"
 
-    // Basic proot command to run a single command in Alpine
     val prootCmd = mutableListOf(
         linker,
         binDir.child("proot").absolutePath,
@@ -159,7 +164,6 @@ private fun runInAlpine(activity: MainActivity, command: String) {
         "-b", "/proc",
         "-b", "/sys",
         "-b", "/sdcard",
-        "-b", binDir.absolutePath + ":/usr/bin",
         "-w", "/root",
         "/bin/sh", "-c", "export PATH=/bin:/sbin:/usr/bin:/usr/sbin && $command"
     )
@@ -170,11 +174,21 @@ private fun runInAlpine(activity: MainActivity, command: String) {
     env["PROOT_TMP_DIR"] = activity.cacheDir.child("proot_tmp").absolutePath.also { File(it).mkdirs() }
 
     val process = pb.redirectErrorStream(true).start()
-    val exitCode = process.waitFor()
 
+    withContext(Dispatchers.IO) {
+        process.inputStream.bufferedReader().use { reader ->
+            var line: String?
+            while (reader.readLine().also { line = it } != null) {
+                withContext(Dispatchers.Main) {
+                    onLine(line!!)
+                }
+            }
+        }
+    }
+
+    val exitCode = process.waitFor()
     if (exitCode != 0) {
-        val output = process.inputStream.bufferedReader().readText()
-        throw Exception("Comando falhou: $output")
+        throw Exception("Comando falhou com código $exitCode")
     }
 }
 
