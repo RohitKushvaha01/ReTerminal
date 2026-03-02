@@ -36,8 +36,8 @@ class SessionService : Service() {
             sessionList.clear()
             updateNotification()
         }
-        fun createSession(id: String, client: TerminalSessionClient, activity: MainActivity,workingMode:Int): TerminalSession {
-            return MkSession.createSession(activity, client, id, workingMode = workingMode).also {
+        fun createSession(id: String, client: TerminalSessionClient, activity: MainActivity,workingMode:Int, env:Map<String, String>? = null): TerminalSession {
+            return MkSession.createSession(activity, client, id, workingMode = workingMode, extraEnv = env).also {
                 sessions[id] = it
                 sessionList[id] = workingMode
                 updateNotification()

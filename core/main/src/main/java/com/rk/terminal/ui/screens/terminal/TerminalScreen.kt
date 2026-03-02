@@ -308,6 +308,15 @@ fun TerminalScreen(
                             Row {
                                 val keyboardController = LocalSoftwareKeyboardController.current
                                 IconButton(onClick = {
+                                    navController.navigate(MainActivityRoutes.BotScreen.route)
+                                    keyboardController?.hide()
+                                }) {
+                                    Icon(
+                                        imageVector = Icons.Default.Menu,
+                                        contentDescription = "Bot Control"
+                                    )
+                                }
+                                IconButton(onClick = {
                                     navController.navigate(MainActivityRoutes.Settings.route)
                                     keyboardController?.hide()
                                 }) {

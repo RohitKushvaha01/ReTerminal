@@ -24,7 +24,7 @@ import java.io.FileOutputStream
 
 object MkSession {
     fun createSession(
-        activity: MainActivity, sessionClient: TerminalSessionClient, session_id: String,workingMode:Int
+        activity: MainActivity, sessionClient: TerminalSessionClient, session_id: String,workingMode:Int, extraEnv: Map<String, String>? = null
     ): TerminalSession {
         with(activity) {
             val envVariables = mapOf(
@@ -108,6 +108,10 @@ object MkSession {
 
             pendingCommand?.env?.let {
                 env.addAll(it)
+            }
+
+            extraEnv?.forEach { (key, value) ->
+                env.add("$key=$value")
             }
 
             val args: Array<String>

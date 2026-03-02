@@ -24,6 +24,9 @@ import com.rk.terminal.ui.screens.downloader.Downloader
 import com.rk.terminal.ui.screens.settings.Settings
 import com.rk.terminal.ui.screens.terminal.Rootfs
 import com.rk.terminal.ui.screens.terminal.TerminalScreen
+import com.rk.terminal.ui.screens.bot.BotScreen
+import com.rk.terminal.ui.screens.bot.BotSettings
+import com.rk.terminal.ui.screens.bot.SetupScreen
 
 var showStatusBar = mutableStateOf(Settings.statusBar)
 var horizontal_statusBar = mutableStateOf(Settings.horizontal_statusBar)
@@ -68,7 +71,7 @@ fun UpdateStatusBar(mainActivityActivity: MainActivity,show: Boolean = true){
 fun MainActivityNavHost(modifier: Modifier = Modifier,navController: NavHostController,mainActivity: MainActivity) {
     NavHost(
         navController = navController,
-        startDestination = MainActivityRoutes.MainScreen.route,
+        startDestination = if (Rootfs.isDownloaded.value) MainActivityRoutes.BotScreen.route else MainActivityRoutes.SetupScreen.route,
         enterTransition = { NavigationAnimationTransitions.enterTransition },
         exitTransition = { NavigationAnimationTransitions.exitTransition },
         popEnterTransition = { NavigationAnimationTransitions.popEnterTransition },
@@ -96,6 +99,24 @@ fun MainActivityNavHost(modifier: Modifier = Modifier,navController: NavHostCont
         composable(MainActivityRoutes.Customization.route){
             UpdateStatusBar(mainActivity,show = true)
             Customization()
+        }
+        composable(MainActivityRoutes.BotScreen.route) {
+            BotScreen(mainActivity = mainActivity, navController = navController)
+        }
+        composable(MainActivityRoutes.BotSettings.route) {
+            BotSettings(navController = navController)
+        }
+        composable(MainActivityRoutes.SetupScreen.route) {
+            SetupScreen(mainActivity = mainActivity, navController = navController)
+        }
+        composable(MainActivityRoutes.MainScreen.route) {
+            val config = LocalConfiguration.current
+            if (Configuration.ORIENTATION_LANDSCAPE == config.orientation){
+                UpdateStatusBar(mainActivity, show = horizontal_statusBar.value)
+            }else{
+                UpdateStatusBar(mainActivity, show = showStatusBar.value)
+            }
+            TerminalScreen(mainActivityActivity = mainActivity, navController = navController)
         }
     }
 }

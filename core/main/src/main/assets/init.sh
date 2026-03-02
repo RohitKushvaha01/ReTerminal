@@ -28,17 +28,12 @@ if [ -n "$missing_packages" ]; then
     echo -e "\e[34m[*] \e[0mUse \e[32mapk\e[0m to install new packages\e[0m"
 fi
 
-# Clone FileStreamBot and install requirements if not already present
-if [ ! -d "$HOME/FileStreamBot" ]; then
-    echo -e "\e[34;1m[*] \e[0mCloning FileStreamBot...\e[0m"
-    git clone https://github.com/TheCaduceus/FileStreamBot.git "$HOME/FileStreamBot"
-    if [ -d "$HOME/FileStreamBot" ]; then
-        echo -e "\e[34;1m[*] \e[0mInstalling FileStreamBot requirements...\e[0m"
-        cd "$HOME/FileStreamBot"
-        pip3 install -r requirements.txt
-        cd "$HOME"
-        echo -e "\e[32;1m[+] \e[0mFileStreamBot setup complete\e[0m"
-    fi
+
+if [ "$START_BOT" = "1" ]; then
+    echo -e "\e[34;1m[*] \e[0mStarting FileStreamBot...\e[0m"
+    cd "$HOME/FileStreamBot"
+    python3 -m bot
+    exit 0
 fi
 
 #fix linker warning

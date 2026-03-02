@@ -93,6 +93,42 @@ object Settings {
         get() = Preference.getBoolean(key = "shortcuts_enabled", default = true)
         set(value) = Preference.setBoolean(key = "shortcuts_enabled", value)
 
+    // Bot Settings
+    var bot_api_id
+        get() = Preference.getString(key = "bot_api_id", default = "")
+        set(value) = Preference.setString(key = "bot_api_id", value)
+    var bot_api_hash
+        get() = Preference.getString(key = "bot_api_hash", default = "")
+        set(value) = Preference.setString(key = "bot_api_hash", value)
+    var bot_owner_id
+        get() = Preference.getString(key = "bot_owner_id", default = "")
+        set(value) = Preference.setString(key = "bot_owner_id", value)
+    var bot_allowed_ids
+        get() = Preference.getString(key = "bot_allowed_ids", default = "")
+        set(value) = Preference.setString(key = "bot_allowed_ids", value)
+    var bot_username
+        get() = Preference.getString(key = "bot_username", default = "")
+        set(value) = Preference.setString(key = "bot_username", value)
+    var bot_token
+        get() = Preference.getString(key = "bot_token", default = "")
+        set(value) = Preference.setString(key = "bot_token", value)
+    var bot_channel_id
+        get() = Preference.getString(key = "bot_channel_id", default = "")
+        set(value) = Preference.setString(key = "bot_channel_id", value)
+    var bot_secret_length
+        get() = Preference.getString(key = "bot_secret_length", default = "24")
+        set(value) = Preference.setString(key = "bot_secret_length", value)
+    var bot_base_url
+        get() = Preference.getString(key = "bot_base_url", default = "http://127.0.0.1:5000")
+        set(value) = Preference.setString(key = "bot_base_url", value)
+    var bot_bind_addr
+        get() = Preference.getString(key = "bot_bind_addr", default = "0.0.0.0")
+        set(value) = Preference.setString(key = "bot_bind_addr", value)
+    var bot_port
+        get() = Preference.getString(key = "bot_port", default = "5000")
+        set(value) = Preference.setString(key = "bot_port", value)
+
+
     fun getShortcutBinding(action: com.rk.terminal.ui.screens.terminal.ShortcutAction): com.rk.terminal.ui.screens.terminal.ShortcutBinding {
         val raw = Preference.getString(key = action.prefKey, default = action.default.serialize())
         return com.rk.terminal.ui.screens.terminal.ShortcutBinding.deserialize(raw)
