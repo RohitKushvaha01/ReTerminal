@@ -89,6 +89,19 @@ object Settings {
         get() = Preference.getBoolean(key = "force_soft_keyboard", default = true)
         set(value) = Preference.setBoolean(key = "force_soft_keyboard",value)
 
+    var shortcuts_enabled
+        get() = Preference.getBoolean(key = "shortcuts_enabled", default = true)
+        set(value) = Preference.setBoolean(key = "shortcuts_enabled", value)
+
+    fun getShortcutBinding(action: com.rk.terminal.ui.screens.terminal.ShortcutAction): com.rk.terminal.ui.screens.terminal.ShortcutBinding {
+        val raw = Preference.getString(key = action.prefKey, default = action.default.serialize())
+        return com.rk.terminal.ui.screens.terminal.ShortcutBinding.deserialize(raw)
+    }
+
+    fun setShortcutBinding(action: com.rk.terminal.ui.screens.terminal.ShortcutAction, binding: com.rk.terminal.ui.screens.terminal.ShortcutBinding) {
+        Preference.setString(key = action.prefKey, value = binding.serialize())
+    }
+
 
 
 }

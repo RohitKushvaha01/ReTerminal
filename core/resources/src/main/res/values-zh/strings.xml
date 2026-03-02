@@ -43,4 +43,19 @@
     <string name="downloading">下载中.. %1$d%%</string>
     <string name="network_error">网络错误</string>
     <string name="setup_failed">安装失败：%1$s</string>
+    <string name="keyboard_shortcuts">键盘快捷键</string>
+    <string name="keyboard_shortcuts_desc">启用键盘快捷键</string>
+    <string name="shortcut_paste">粘贴</string>
+    <string name="shortcut_paste_desc">粘贴剪贴板内容</string>
+    <string name="shortcut_new_session">新建会话</string>
+    <string name="shortcut_new_session_desc">创建新的终端会话</string>
+    <string name="shortcut_close_session">关闭会话</string>
+    <string name="shortcut_close_session_desc">关闭当前终端会话</string>
+    <string name="shortcut_switch_prev">上一个会话</string>
+    <string name="shortcut_switch_prev_desc">切换到上一个会话</string>
+    <string name="shortcut_switch_next">下一个会话</string>
+    <string name="shortcut_switch_next_desc">切换到下一个会话</string>
+    <string name="shortcut_capture_title">请按下快捷键组合</string>
+    <string name="shortcut_capture_hint">等待输入…</string>
+    <string name="shortcut_clear">清除</string>
 </resources>
