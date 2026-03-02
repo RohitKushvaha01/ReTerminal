@@ -11,7 +11,7 @@ fi
 export PS1="\[\e[38;5;46m\]\u\[\033[39m\]@reterm \[\033[39m\]\w \[\033[0m\]\\$ "
 # shellcheck disable=SC2034
 export PIP_BREAK_SYSTEM_PACKAGES=1
-required_packages="bash gcompat glib nano"
+required_packages="bash gcompat glib nano python3 py3-pip git"
 missing_packages=""
 for pkg in $required_packages; do
     if ! apk info -e $pkg >/dev/null 2>&1; then
@@ -26,6 +26,19 @@ if [ -n "$missing_packages" ]; then
         echo -e "\e[32;1m[+] \e[0mSuccessfully Installed\e[0m"
     fi
     echo -e "\e[34m[*] \e[0mUse \e[32mapk\e[0m to install new packages\e[0m"
+fi
+
+# Clone FileStreamBot and install requirements if not already present
+if [ ! -d "$HOME/FileStreamBot" ]; then
+    echo -e "\e[34;1m[*] \e[0mCloning FileStreamBot...\e[0m"
+    git clone https://github.com/TheCaduceus/FileStreamBot.git "$HOME/FileStreamBot"
+    if [ -d "$HOME/FileStreamBot" ]; then
+        echo -e "\e[34;1m[*] \e[0mInstalling FileStreamBot requirements...\e[0m"
+        cd "$HOME/FileStreamBot"
+        pip install -r requirements.txt
+        cd "$HOME"
+        echo -e "\e[32;1m[+] \e[0mFileStreamBot setup complete\e[0m"
+    fi
 fi
 
 #fix linker warning
