@@ -22,6 +22,7 @@ APK_URL="$APK_URL"
 echo "Downloading APK from: $APK_URL"
 curl -L -o "$RELEASE_FILE" "$APK_URL"
 
-python apkdiff.py $BUILT_APK $RELEASE_FILE
+python apkdiff.py "$BUILT_APK" "release.apk"
+
 
 
