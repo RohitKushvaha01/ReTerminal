@@ -18,7 +18,7 @@ if [[ -z "$APK_URL" ]]; then
     exit 1
 fi
 
-APK_URL="https://github.com$APK_URL"
+APK_URL="$APK_URL"
 echo "Downloading APK from: $APK_URL"
 curl -L -o "$RELEASE_FILE" "$APK_URL"
 
