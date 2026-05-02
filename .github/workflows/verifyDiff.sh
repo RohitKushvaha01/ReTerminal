@@ -11,7 +11,7 @@ REPO="RohitKushvaha01/ReTerminal"
 RELEASE_FILE="release.apk"
 
 LATEST_RELEASE_URL="https://github.com/$REPO/releases/latest"
-APK_URL=$(curl -s "$LATEST_RELEASE_URL" | grep -oP 'href="\K(/[^"]+\.apk)' | head -n 1)
+APK_URL=$(curl -s https://api.github.com/repos/$REPO/releases/latest | grep "browser_download_url" | grep ".apk" | head -n 1 | cut -d '"' -f 4)
 
 if [[ -z "$APK_URL" ]]; then
     echo "No APK found!"
