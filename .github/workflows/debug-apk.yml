@@ -1,0 +1,44 @@
+name: Build Debug APK
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+      - dev
+      - reterminal-fork
+    paths-ignore:
+      - '**/*.md'
+
+jobs:
+  debug-apk:
+    name: Build F-Droid Debug APK
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: gradle
+
+      - name: Prepare Gradle
+        run: chmod +x gradlew
+
+      - name: Build debug APK
+        run: ./gradlew --no-daemon assembleFdroidDebug
+
+      - name: Rename APK
+        run: |
+          mkdir -p artifacts
+          cp app/build/outputs/apk/Fdroid/debug/*.apk artifacts/ReTerminal-fork-debug.apk
+
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ReTerminal-fork-debug-apk
+          path: artifacts/ReTerminal-fork-debug.apk
