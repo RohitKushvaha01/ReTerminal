@@ -263,11 +263,11 @@ object Preference {
         return default
     }
 
-    fun setFloat(key: Float, value: Float) {
-        floatCache[key.toString()] = value
+    fun setFloat(key: String, value: Float) {
+        floatCache[key] = value
         runCatching {
             val editor = sharedPreferences.edit()
-            editor.putFloat(key.toString(),value)
+            editor.putFloat(key,value)
             editor.apply()
         }.onFailure {
             it.printStackTrace()
