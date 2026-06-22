@@ -43,17 +43,13 @@ object MkSession {
 
             val initFile: File = localBinDir().child("init-host")
 
-            if (initFile.exists().not()){
-                initFile.createFileIfNot()
-                initFile.writeText(assets.open("init-host.sh").bufferedReader().use { it.readText() })
-            }
+            initFile.createFileIfNot()
+            initFile.writeText(assets.open("init-host.sh").bufferedReader().use { it.readText() })
 
 
             localBinDir().child("init").apply {
-                if (exists().not()){
-                    createFileIfNot()
-                    writeText(assets.open("init.sh").bufferedReader().use { it.readText() })
-                }
+                createFileIfNot()
+                writeText(assets.open("init.sh").bufferedReader().use { it.readText() })
             }
 
 
@@ -68,13 +64,15 @@ object MkSession {
                 "DEBUG=${BuildConfig.DEBUG}",
                 "PREFIX=${filesDir.parentFile!!.path}",
                 "LD_LIBRARY_PATH=${localLibDir().absolutePath}",
-                "LINKER=${if(File("/system/bin/linker64").exists()){"/system/bin/linker64"}else{"/system/bin/linker"}}",
+                "LINKER=${if(File("/system/bin/linker64").exists()){ "/system/bin/linker64" }else{ "/system/bin/linker" }}",
                 "NATIVE_LIB_DIR=${applicationInfo.nativeLibraryDir}",
                 "PKG=${packageName}",
                 "RISH_APPLICATION_ID=${packageName}",
                 "PKG_PATH=${applicationInfo.sourceDir}",
                 "PROOT_TMP_DIR=${getTempDir().child(session_id).also { if (it.exists().not()){it.mkdirs()} }}",
-                "TMPDIR=${getTempDir().absolutePath}"
+                "TMPDIR=${getTempDir().absolutePath}",
+                "RET_DEFAULT_SHELL=${Settings.default_shell}",
+                "SHELL=/bin/${Settings.default_shell}"
             )
 
             if (File(applicationInfo.nativeLibraryDir).child("libproot-loader32.so").exists()){
@@ -93,18 +91,6 @@ object MkSession {
 
 
             env.addAll(envVariables.map { "${it.key}=${it.value}" })
-
-            localDir().child("stat").apply {
-                if (exists().not()){
-                    writeText(stat)
-                }
-            }
-
-            localDir().child("vmstat").apply {
-                if (exists().not()){
-                    writeText(vmstat)
-                }
-            }
 
             pendingCommand?.env?.let {
                 env.addAll(it)
