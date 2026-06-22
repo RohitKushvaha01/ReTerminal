@@ -23,17 +23,17 @@ android {
         includeInApk = false
         includeInBundle = false
     }
-    
+
     signingConfigs {
         create("release") {
             val isGITHUB_ACTION = System.getenv("GITHUB_ACTIONS") == "true"
-            
+
             val propertiesFilePath = if (isGITHUB_ACTION) {
                 "/tmp/signing.properties"
             } else {
                 "/home/rohit/Android/xed-signing/signing.properties"
             }
-            
+
             val propertiesFile = File(propertiesFilePath)
             if (propertiesFile.exists()) {
                 val properties = Properties()
@@ -45,7 +45,7 @@ android {
                 } else {
                     (properties["storeFile"] as String?)?.let { File(it) }
                 }
-                
+
                 storePassword = properties["storePassword"] as String?
             } else {
                 println("Signing properties file not found at $propertiesFilePath")
@@ -58,8 +58,8 @@ android {
             keyPassword = "testkey"
         }
     }
-    
-    
+
+
     buildTypes {
         release{
             isMinifyEnabled = false
@@ -69,16 +69,24 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro"
             )
             signingConfig = signingConfigs.getByName("release")
-            resValue("string","app_name","ReTerminal")
+            resValue("string","app_name","AndLinux")
         }
         debug{
             applicationIdSuffix = ".debug"
             versionNameSuffix = "-DEBUG"
-            resValue("string","app_name","ReTerminal-Debug")
+            resValue("string","app_name","AndLinux Debug")
+        }
+        create("alpha") {
+            initWith(getByName("release"))
+            matchingFallbacks += listOf("release", "debug")
+            isDebuggable = false
+            signingConfig = signingConfigs.getByName("debug")
+            versionNameSuffix = "-alpha"
+            resValue("string", "app_name", "AndLinux Alpha")
         }
     }
 
-    
+
     defaultConfig {
         applicationId = "com.rk.terminal"
         minSdk = 26
@@ -86,8 +94,8 @@ android {
         targetSdk = 28
 
         //versioning
-        versionCode = 8
-        versionName = "1.2.1"
+        versionCode = 9
+        versionName = "1.3.0"
         vectorDrawables {
             useSupportLibrary = true
         }
@@ -106,18 +114,18 @@ android {
             targetSdk = 35
         }
     }
-    
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
        // isCoreLibraryDesugaringEnabled = true
     }
-    
+
     buildFeatures {
         viewBinding = true
         compose = true
     }
-    
+
     kotlinOptions {
         jvmTarget = "17"
     }
