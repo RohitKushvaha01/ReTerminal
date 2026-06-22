@@ -1,4 +1,4 @@
-name: Build Debug APK
+name: Build AndLinux Alpha APK
 
 on:
   workflow_dispatch:
@@ -11,8 +11,8 @@ on:
       - '**/*.md'
 
 jobs:
-  debug-apk:
-    name: Build F-Droid Debug APK
+  alpha-apk:
+    name: Build installable alpha APK
     runs-on: ubuntu-latest
 
     steps:
@@ -29,16 +29,16 @@ jobs:
       - name: Prepare Gradle
         run: chmod +x gradlew
 
-      - name: Build debug APK
-        run: ./gradlew --no-daemon assembleFdroidDebug
+      - name: Build alpha APK
+        run: ./gradlew --no-daemon assembleFdroidAlpha
 
       - name: Rename APK
         run: |
           mkdir -p artifacts
-          cp app/build/outputs/apk/Fdroid/debug/*.apk artifacts/ReTerminal-fork-debug.apk
+          cp app/build/outputs/apk/Fdroid/alpha/*.apk artifacts/Andlinux.apk
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
-          name: ReTerminal-fork-debug-apk
-          path: artifacts/ReTerminal-fork-debug.apk
+          name: Andlinux-apk
+          path: artifacts/Andlinux.apk
