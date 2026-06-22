@@ -78,6 +78,13 @@ object InputMode {
     const val VISIBLE_PASSWORD = 2
 }
 
+object ShellMode {
+    const val ASH = "ash"
+    const val BASH = "bash"
+    const val FISH = "fish"
+    const val ZSH = "zsh"
+}
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -85,6 +92,7 @@ fun Settings(modifier: Modifier = Modifier,navController: NavController,mainActi
     val context = LocalContext.current
     var selectedOption by remember { mutableIntStateOf(Settings.working_Mode) }
     var selectedInputMode by remember { mutableIntStateOf(Settings.input_mode) }
+    var selectedShell by remember { mutableStateOf(Settings.default_shell) }
 
     PreferenceLayout(label = stringResource(strings.settings)) {
         PreferenceGroup(heading = stringResource(strings.default_working_mode)) {
@@ -125,6 +133,36 @@ fun Settings(modifier: Modifier = Modifier,navController: NavController,mainActi
                     selectedOption = WorkingMode.ANDROID
                     Settings.working_Mode = selectedOption
                 })
+        }
+
+        PreferenceGroup(heading = "Default Shell") {
+            val shells = listOf(
+                Triple(ShellMode.ASH, "ash", "BusyBox ash: minimal and fastest default shell"),
+                Triple(ShellMode.BASH, "bash", "GNU Bash: best compatibility for scripts"),
+                Triple(ShellMode.FISH, "fish", "Fish: modern interactive shell with autosuggestions"),
+                Triple(ShellMode.ZSH, "zsh", "Zsh: powerful configurable shell")
+            )
+
+            shells.forEach { (value, title, desc) ->
+                SettingsCard(
+                    title = { Text(title) },
+                    description = { Text(desc) },
+                    startWidget = {
+                        RadioButton(
+                            modifier = Modifier.padding(start = 8.dp),
+                            selected = selectedShell == value,
+                            onClick = {
+                                selectedShell = value
+                                Settings.default_shell = value
+                            }
+                        )
+                    },
+                    onClick = {
+                        selectedShell = value
+                        Settings.default_shell = value
+                    }
+                )
+            }
         }
 
         PreferenceGroup(heading = stringResource(strings.input_mode)) {
