@@ -47,6 +47,10 @@ object Settings {
         get() = Preference.getInt(key = "workingMode", default = WorkingMode.ALPINE)
         set(value) = Preference.setInt(key = "workingMode",value)
 
+    var default_shell
+        get() = Preference.getString(key = "default_shell", default = "ash")
+        set(value) = Preference.setString(key = "default_shell", value)
+
     var input_mode
         get() = Preference.getInt(key = "input_mode", default = InputMode.DEFAULT)
         set(value) = Preference.setInt(key = "input_mode", value)
@@ -259,11 +263,11 @@ object Preference {
         return default
     }
 
-    fun setFloat(key: String, value: Float) {
-        floatCache[key] = value
+    fun setFloat(key: Float, value: Float) {
+        floatCache[key.toString()] = value
         runCatching {
             val editor = sharedPreferences.edit()
-            editor.putFloat(key,value)
+            editor.putFloat(key.toString(),value)
             editor.apply()
         }.onFailure {
             it.printStackTrace()
