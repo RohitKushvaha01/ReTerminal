@@ -1,0 +1,3 @@
+<lint>
+    <issue id="ExpiredTargetSdkVersion" severity="ignore" />
+</lint>
