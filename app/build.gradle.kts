@@ -107,13 +107,9 @@ android {
     }
 }
 
-tasks.register("prepareAndLinuxSources") {
-    doLast {
-        exec {
-            workingDir = rootProject.projectDir
-            commandLine("python3", ".github/scripts/prepare_andlinux.py")
-        }
-    }
+val prepareAndLinuxSources = tasks.register<org.gradle.api.tasks.Exec>("prepareAndLinuxSources") {
+    workingDir = rootProject.projectDir
+    commandLine("python3", ".github/scripts/prepare_andlinux.py")
 }
 
 fun downloadFile(localUrl: String, remoteUrl: String, expectedChecksum: String) {
@@ -169,8 +165,16 @@ tasks.register("downloadPrebuilt") {
 }
 
 afterEvaluate {
+    listOf(
+        "preFdroidReleaseBuild",
+        "preFdroidDebugBuild",
+        "prePlayStoreReleaseBuild",
+        "prePlayStoreDebugBuild"
+    ).forEach { taskName ->
+        tasks.findByName(taskName)?.dependsOn(prepareAndLinuxSources)
+    }
+
     android.applicationVariants.all { variant ->
-        variant.preBuildProvider.dependsOn("prepareAndLinuxSources")
         variant.javaCompileProvider.dependsOn("downloadPrebuilt")
         true
     }
