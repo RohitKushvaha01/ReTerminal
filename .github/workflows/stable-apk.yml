@@ -1,0 +1,24 @@
+name: Build Stable APK
+
+on:
+  workflow_dispatch:
+
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: gradle
+      - run: chmod +x gradlew
+      - run: ./gradlew --no-daemon assembleFdroidDebug
+      - run: |
+          mkdir -p artifacts
+          cp app/build/outputs/apk/Fdroid/debug/*.apk artifacts/Andlinux.apk
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Andlinux-apk
+          path: artifacts/Andlinux.apk
