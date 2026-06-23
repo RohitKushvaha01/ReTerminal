@@ -5,10 +5,13 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.os.Build
 import androidx.appcompat.app.AppCompatDelegate
+import androidx.compose.runtime.mutableStateOf
 import com.rk.libcommons.application
 import com.rk.terminal.ui.screens.settings.WorkingMode
 
 object Settings {
+    private val terminalThemeState = mutableStateOf(Preference.getString(key = "terminal_theme", default = "Default"))
+
     //Boolean
     var seccomp
         get() = Preference.getBoolean(key = "seccomp", default = false)
@@ -49,6 +52,13 @@ object Settings {
     var default_shell
         get() = Preference.getString(key = "default_shell", default = "ash")
         set(value) = Preference.setString(key = "default_shell", value)
+
+    var terminal_theme
+        get() = terminalThemeState.value
+        set(value) {
+            terminalThemeState.value = value
+            Preference.setString(key = "terminal_theme", value = value)
+        }
 
     var custom_background_name
         get() = Preference.getString(key = "custom_bg_name", default = "No Image Selected")
@@ -123,6 +133,11 @@ object Preference {
     @SuppressLint("ApplySharedPref")
     fun clearData(){
         sharedPreferences.edit().clear().commit()
+        stringCache.clear()
+        boolCache.clear()
+        intCache.clear()
+        longCache.clear()
+        floatCache.clear()
     }
 
     fun removeKey(key: String){
