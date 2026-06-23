@@ -1,25 +1,31 @@
 # AndLinux
 
-**AndLinux** — мобильная Linux-терминальная среда для Android без root-доступа. Проект ориентирован на стабильный запуск Alpine Linux через proot, нормальную работу экранной клавиатуры, гибкую настройку оболочки и полноценные темы интерфейса.
+[Русский](#русский) | [English](#english)
+
+---
+
+## Русский
+
+**AndLinux** — мобильная Linux-терминальная среда для Android без root-доступа.
+
+Проект делает упор на стабильный запуск Alpine Linux через proot, удобную работу с Android-клавиатурой, выбор shell и полноценные цветовые темы для терминала и интерфейса приложения.
 
 ```text
 Версия: 1.4.1
-Статус: рабочая beta/stable-база
 Разработчик: SiriLV
 Лицензия: MIT
+Package ID: com.term.andlinux
 Root-доступ: не требуется
-Основной Linux-дистрибутив: Alpine Linux
+Основная среда: Alpine Linux
 ```
 
-## Возможности
+### Возможности
 
-- Запуск Alpine Linux внутри Android через proot.
+- Alpine Linux внутри Android через proot.
 - Отдельный режим Android shell.
 - Несколько терминальных сессий.
-- Быстрое создание и закрытие сессий.
-- Рабочий ввод с Android-клавиатуры без задержки до пробела.
-- Виртуальные клавиши для терминала: `ESC`, `CTRL`, `ALT`, стрелки, `HOME`, `END`, `PGUP`, `PGDN`.
-- Выбор shell для Alpine-сессий:
+- Виртуальные терминальные клавиши: `ESC`, `CTRL`, `ALT`, стрелки, `HOME`, `END`, `PGUP`, `PGDN`.
+- Выбор shell для Alpine:
   - `ash`
   - `bash`
   - `fish`
@@ -28,18 +34,16 @@ Root-доступ: не требуется
 - Автоматическая установка выбранного shell, если его ещё нет в Alpine.
 - Настраиваемый размер текста терминала.
 - Настраиваемый scrollback.
-- Поддержка пользовательского шрифта.
-- Поддержка пользовательского фона.
-- Настройка прозрачности фона.
+- Пользовательский шрифт.
+- Пользовательский фон.
+- Прозрачность фона.
 - Переключатели status bar, title bar и virtual keys.
 - Настраиваемые keyboard shortcuts.
-- Полноценные темы терминала и интерфейса приложения.
+- Темы, которые меняют терминал и интерфейс приложения.
 
-## Темы
+### Темы
 
-AndLinux 1.4.1 поддерживает темы, которые меняют не только цвета текста в терминале, но и цвета всего интерфейса приложения: фон, карточки, акценты, панели, элементы настроек и системные bar-флаги.
-
-Доступные темы:
+AndLinux 1.4.1 поддерживает набор встроенных цветовых схем:
 
 ```text
 Default
@@ -60,11 +64,11 @@ Ayu Dark
 Ayu Light
 ```
 
-Светлые темы используют тёмный терминальный foreground, чтобы текст оставался читаемым на светлом фоне. Тёмные темы используют собственные terminal color schemes с подходящими foreground/background/cursor цветами.
+Темы применяются к терминалу и основному UI: экрану сессий, настройкам, карточкам, панелям, акцентным цветам и системным bar-флагам.
 
-## Первый запуск: имя пользователя и hostname
+### Первый запуск: user и hostname
 
-При первом запуске Alpine AndLinux предлагает настроить видимое имя пользователя и hostname:
+При первом запуске Alpine приложение предлагает задать видимое имя пользователя и hostname:
 
 ```text
 AndLinux first setup
@@ -75,72 +79,38 @@ Host name [andlinux]: okak
 Saved identity: siri@okak
 ```
 
-После настройки prompt выглядит примерно так:
+После этого prompt будет выглядеть примерно так:
 
 ```text
 siri@okak:~#
 ```
 
-Это меняет видимый prompt и переменные окружения внутри контейнера:
-
-```text
-USER
-LOGNAME
-HOSTNAME
-/etc/hostname
-/etc/hosts
-~/.andlinux_identity
-```
-
-Фактический пользователь внутри proot остаётся root/fakeroot. Это нормально для текущей архитектуры Alpine-среды.
-
-Повторно изменить имя пользователя и hostname можно командой:
+Повторно изменить имя можно командой:
 
 ```sh
 andlinux-identity
 ```
 
-## Shell selection
+Настройка меняет prompt, `/etc/hostname`, `/etc/hosts` и переменные окружения внутри Alpine. Среда по-прежнему работает через proot.
 
-Открой настройки:
+### Shell
+
+Открой:
 
 ```text
 Settings -> Default Shell
 ```
 
-Выбери нужную оболочку:
+Выбери `ash`, `bash`, `fish` или `zsh`, затем открой новую сессию.
 
-```text
-ash   лёгкая стандартная оболочка Alpine/BusyBox
-bash  совместимость со скриптами и привычный GNU shell
-fish  удобная интерактивная оболочка
-zsh   гибкая настраиваемая оболочка
-```
-
-После смены shell открой новую сессию.
-
-Проверка внутри Alpine:
+Проверка:
 
 ```sh
 echo "$SHELL"
 echo "$0"
 ```
 
-## Клавиатура
-
-В AndLinux сохранён рабочий путь ввода из терминального backend. Отдельная настройка Input Mode убрана, потому что на некоторых Android-клавиатурах она вызывала задержку: команда появлялась только после нажатия пробела.
-
-Проверочные команды:
-
-```sh
-exit
-apk update
-fastfetch
-```
-
-Текст должен появляться сразу во время ввода.
-
-## Сборка APK
+### Сборка APK
 
 Основной workflow:
 
@@ -154,7 +124,7 @@ fastfetch
 ./gradlew --no-daemon assembleFdroidRelease -x lintVitalFdroidRelease
 ```
 
-Готовый artifact в GitHub Actions:
+Artifact в GitHub Actions:
 
 ```text
 Andlinux-apk/Andlinux.apk
@@ -166,39 +136,182 @@ Andlinux-apk/Andlinux.apk
 app/build/outputs/apk/Fdroid/release/*.apk
 ```
 
-## Установка локально
+### Roadmap
 
-После скачивания `Andlinux.apk` установи его как обычный APK-файл. Для обновления поверх предыдущей версии package name сохранён прежним:
-
-```text
-com.rk.terminal
-```
-
-## Roadmap
-
-Ближайшие направления развития:
+Следующие направления:
 
 - Поддержка Arch Linux как отдельного rootfs-профиля.
 - Поддержка Debian как отдельного rootfs-профиля.
 - Менеджер дистрибутивов:
   - выбор профиля;
-  - загрузка/import rootfs;
-  - проверка checksum;
+  - загрузка или import rootfs;
+  - checksum-проверка;
   - отдельная директория для каждого дистрибутива;
   - отдельный init-script;
   - reset/delete/export rootfs.
-- Улучшение экрана первого запуска.
+- Улучшение первого setup-экрана.
 - Presets для dev-пакетов.
 - Более аккуратный менеджер сессий.
 
-Arch и Debian не добавлены в 1.4.1 намеренно: сначала зафиксирована стабильная Alpine-база с рабочим вводом, shell-переключением и темами.
+Arch и Debian не входят в версию 1.4.1. Сначала зафиксирована стабильная Alpine-база.
 
-## Лицензия
+### Лицензия
 
-Проект распространяется под лицензией **MIT**. Подробности см. в файле [`LICENSE`](LICENSE).
+MIT. См. [`LICENSE`](LICENSE).
 
-## Developer
+---
+
+## English
+
+**AndLinux** is a mobile Linux terminal environment for Android without root access.
+
+The project focuses on stable Alpine Linux startup through proot, practical Android keyboard behavior, shell selection, and full color themes for both the terminal and the app UI.
 
 ```text
-SiriLV
+Version: 1.4.1
+Developer: SiriLV
+License: MIT
+Package ID: com.term.andlinux
+Root access: not required
+Main environment: Alpine Linux
 ```
+
+### Features
+
+- Alpine Linux on Android through proot.
+- Separate Android shell mode.
+- Multiple terminal sessions.
+- Virtual terminal keys: `ESC`, `CTRL`, `ALT`, arrows, `HOME`, `END`, `PGUP`, `PGDN`.
+- Alpine shell selector:
+  - `ash`
+  - `bash`
+  - `fish`
+  - `zsh`
+- Login-shell startup for the selected shell.
+- Automatic installation of the selected shell when it is missing from Alpine.
+- Configurable terminal text size.
+- Configurable scrollback.
+- Custom font support.
+- Custom background support.
+- Background transparency setting.
+- Status bar, title bar, and virtual keys toggles.
+- Configurable keyboard shortcuts.
+- Themes for the terminal and the app interface.
+
+### Themes
+
+AndLinux 1.4.1 includes built-in color schemes:
+
+```text
+Default
+Dracula
+Nord
+Solarized Dark
+Solarized Light
+Gruvbox Dark
+Gruvbox Light
+One Dark
+Tokyo Night
+Tokyo Night Light
+Catppuccin Mocha
+Catppuccin Latte
+Monokai
+Material Dark
+Ayu Dark
+Ayu Light
+```
+
+Themes are applied to the terminal and the main UI: session drawer, settings, cards, panels, accent colors, and system bar flags.
+
+### First launch: user and hostname
+
+On the first Alpine launch, AndLinux asks for the visible user name and hostname:
+
+```text
+AndLinux first setup
+
+User name [user]: siri
+Host name [andlinux]: okak
+
+Saved identity: siri@okak
+```
+
+The prompt will then look like this:
+
+```text
+siri@okak:~#
+```
+
+You can change it later with:
+
+```sh
+andlinux-identity
+```
+
+This changes the prompt, `/etc/hostname`, `/etc/hosts`, and environment variables inside Alpine. The environment still runs through proot.
+
+### Shell
+
+Open:
+
+```text
+Settings -> Default Shell
+```
+
+Choose `ash`, `bash`, `fish`, or `zsh`, then open a new session.
+
+Check inside Alpine:
+
+```sh
+echo "$SHELL"
+echo "$0"
+```
+
+### Building the APK
+
+Main workflow:
+
+```text
+.github/workflows/android.yml
+```
+
+Build command:
+
+```sh
+./gradlew --no-daemon assembleFdroidRelease -x lintVitalFdroidRelease
+```
+
+GitHub Actions artifact:
+
+```text
+Andlinux-apk/Andlinux.apk
+```
+
+Local APK path:
+
+```text
+app/build/outputs/apk/Fdroid/release/*.apk
+```
+
+### Roadmap
+
+Planned next steps:
+
+- Arch Linux support as a separate rootfs profile.
+- Debian support as a separate rootfs profile.
+- Distribution manager:
+  - profile selection;
+  - rootfs download or import;
+  - checksum validation;
+  - separate directory per distribution;
+  - separate init script;
+  - reset/delete/export rootfs.
+- Improved first-run setup screen.
+- Developer package presets.
+- Cleaner session manager.
+
+Arch and Debian are not included in 1.4.1. This version first locks down the stable Alpine base.
+
+### License
+
+MIT. See [`LICENSE`](LICENSE).
