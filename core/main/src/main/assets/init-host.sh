@@ -32,9 +32,6 @@ write_fake_proc_stat() {
   total_softirq=0
   total_steal=0
 
-  tmp="$FAKE_PROC_DIR/stat.tmp"
-  : > "$tmp"
-
   i=0
   while [ "$i" -lt "$cpu_count" ]; do
     user=$((now * (i + 3) + 1000))
@@ -54,14 +51,25 @@ write_fake_proc_stat() {
     total_irq=$((total_irq + irq))
     total_softirq=$((total_softirq + softirq))
     total_steal=$((total_steal + steal))
-
-    echo "cpu$i $user $nice $system $idle $iowait $irq $softirq $steal 0 0" >> "$tmp"
     i=$((i + 1))
   done
 
+  stat_file="$FAKE_PROC_DIR/stat"
   {
     echo "cpu $total_user $total_nice $total_system $total_idle $total_iowait $total_irq $total_softirq $total_steal 0 0"
-    cat "$tmp"
+    i=0
+    while [ "$i" -lt "$cpu_count" ]; do
+      user=$((now * (i + 3) + 1000))
+      nice=0
+      system=$((now * (i + 2) / 2 + 500))
+      idle=$((now * 100 + i * 10000 + 100000))
+      iowait=$((now % 97))
+      irq=0
+      softirq=$((now % 53))
+      steal=0
+      echo "cpu$i $user $nice $system $idle $iowait $irq $softirq $steal 0 0"
+      i=$((i + 1))
+    done
     echo "intr 0"
     echo "ctxt $((now * 100))"
     echo "btime $((now - 3600))"
@@ -69,21 +77,12 @@ write_fake_proc_stat() {
     echo "procs_running 1"
     echo "procs_blocked 0"
     echo "softirq 0 0 0 0 0 0 0 0 0 0 0"
-  } > "$FAKE_PROC_DIR/stat"
-
-  rm -f "$tmp"
+  } > "$stat_file"
 }
 
-start_proc_stat_updater() {
-  while true; do
-    write_fake_proc_stat
-    sleep 1
-  done
-}
-
+# Some Android kernels expose /proc/stat in a way btop cannot parse through proot.
+# A static compatibility file avoids crashes and avoids noisy background updater errors.
 write_fake_proc_stat
-start_proc_stat_updater &
-PROC_STAT_UPDATER_PID=$!
 
 ARGS="--kill-on-exit"
 ARGS="$ARGS -w /"
@@ -140,7 +139,4 @@ ARGS="$ARGS --link2symlink"
 ARGS="$ARGS --sysvipc"
 ARGS="$ARGS -L"
 
-$LINKER $PREFIX/local/bin/proot $ARGS sh $PREFIX/local/bin/init "$@"
-STATUS=$?
-kill "$PROC_STAT_UPDATER_PID" 2>/dev/null
-exit "$STATUS"
+exec $LINKER $PREFIX/local/bin/proot $ARGS sh $PREFIX/local/bin/init "$@"
