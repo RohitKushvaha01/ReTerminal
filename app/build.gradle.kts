@@ -107,6 +107,15 @@ android {
     }
 }
 
+tasks.register("prepareAndLinuxSources") {
+    doLast {
+        exec {
+            workingDir = rootProject.projectDir
+            commandLine("python3", ".github/scripts/prepare_andlinux.py")
+        }
+    }
+}
+
 fun downloadFile(localUrl: String, remoteUrl: String, expectedChecksum: String) {
     val digest = MessageDigest.getInstance("SHA-256")
     val file = File(projectDir, localUrl)
@@ -161,6 +170,7 @@ tasks.register("downloadPrebuilt") {
 
 afterEvaluate {
     android.applicationVariants.all { variant ->
+        variant.preBuildProvider.dependsOn("prepareAndLinuxSources")
         variant.javaCompileProvider.dependsOn("downloadPrebuilt")
         true
     }
