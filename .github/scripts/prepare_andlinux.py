@@ -1,4 +1,5 @@
 from pathlib import Path
+import re
 
 ROOT = Path(__file__).resolve().parents[2]
 
@@ -55,18 +56,67 @@ if 'val savedColorsFile = localDir().child("colors.properties")' not in text:
                 }
             }'''
     )
+
+# Terminal text/cursor color must not be forced to white/black when a real terminal theme is selected.
+# The old code was correct only for Default/custom-background mode, but it destroyed light terminal themes.
 text = text.replace(
-    '''mEmulator?.mColors?.mCurrentColors?.apply {
-                    set(256, getViewColor())
-                    set(258, getViewColor())
-                }''',
-    '''if (Settings.terminal_theme == "Default") {
-                    mEmulator?.mColors?.mCurrentColors?.apply {
-                        set(256, getViewColor())
-                        set(258, getViewColor())
-                    }
-                }'''
+    'darkText.value = !isDarkMode',
+    'darkText.value = if (Settings.terminal_theme == "Default") !isDarkMode else Settings.blackTextColor'
 )
+
+text = re.sub(
+    r'(?P<indent>\s*)mEmulator\?\.mColors\?\.mCurrentColors\?\.apply \{\n\s*set\(256, getViewColor\(\)\)\n\s*set\(258, getViewColor\(\)\)\n\s*\}',
+    lambda m: f'{m.group("indent")}if (Settings.terminal_theme == "Default") {{\n'
+              f'{m.group("indent")}    mEmulator?.mColors?.mCurrentColors?.apply {{\n'
+              f'{m.group("indent")}        set(256, getViewColor())\n'
+              f'{m.group("indent")}        set(258, getViewColor())\n'
+              f'{m.group("indent")}    }}\n'
+              f'{m.group("indent")}}}',
+    text
+)
+
+text = re.sub(
+    r'(?P<indent>\s*)mEmulator\?\.mColors\?\.mCurrentColors\?\.apply \{\n\s*set\(256, color\)\n\s*set\(258, color\)\n\s*\}',
+    lambda m: f'{m.group("indent")}if (Settings.terminal_theme == "Default") {{\n'
+              f'{m.group("indent")}    mEmulator?.mColors?.mCurrentColors?.apply {{\n'
+              f'{m.group("indent")}        set(256, color)\n'
+              f'{m.group("indent")}        set(258, color)\n'
+              f'{m.group("indent")}    }}\n'
+              f'{m.group("indent")}}}',
+    text
+)
+
+text = re.sub(
+    r'(?P<indent>\s*)terminalView\.mEmulator\?\.mColors\?\.mCurrentColors\?\.apply \{\n\s*set\(256, color\)\n\s*set\(258, color\)\n\s*\}',
+    lambda m: f'{m.group("indent")}if (Settings.terminal_theme == "Default") {{\n'
+              f'{m.group("indent")}    terminalView.mEmulator?.mColors?.mCurrentColors?.apply {{\n'
+              f'{m.group("indent")}        set(256, color)\n'
+              f'{m.group("indent")}        set(258, color)\n'
+              f'{m.group("indent")}    }}\n'
+              f'{m.group("indent")}}} else {{\n'
+              f'{m.group("indent")}    terminalView.mEmulator?.mColors?.reset()\n'
+              f'{m.group("indent")}}}',
+    text
+)
+
+text = text.replace(
+    '''TerminalColors.COLOR_SCHEME.updateWith(props)
+                                                    }''',
+    '''TerminalColors.COLOR_SCHEME.updateWith(props)
+                                                        mEmulator?.mColors?.reset()
+                                                    }'''
+)
+
+text = text.replace(
+    '''TerminalColors.COLOR_SCHEME.updateWith(props)
+                                                    }
+                                                }''',
+    '''TerminalColors.COLOR_SCHEME.updateWith(props)
+                                                        mEmulator?.mColors?.reset()
+                                                    }
+                                                }'''
+)
+
 terminal.write_text(text)
 
 cust = ROOT / 'core/main/src/main/java/com/rk/terminal/ui/screens/customization/Customization.kt'
