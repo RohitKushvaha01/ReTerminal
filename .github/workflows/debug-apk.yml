@@ -29,13 +29,13 @@ jobs:
       - name: Prepare Gradle
         run: chmod +x gradlew
 
-      - name: Build APK
-        run: ./gradlew --no-daemon assembleFdroidAlpha
+      - name: Build beta APK
+        run: ./gradlew --no-daemon assembleFdroidBeta
 
       - name: Rename APK
         run: |
           mkdir -p artifacts
-          cp app/build/outputs/apk/Fdroid/alpha/*.apk artifacts/Andlinux.apk
+          cp app/build/outputs/apk/Fdroid/beta/*.apk artifacts/Andlinux.apk
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
