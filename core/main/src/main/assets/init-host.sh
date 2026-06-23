@@ -1,7 +1,13 @@
 ALPINE_DIR=$PREFIX/local/alpine
 FAKE_PROC_DIR=$PREFIX/local/proc-fake
+FAKE_SYS_DIR=$PREFIX/local/sys-fake
 
-mkdir -p "$ALPINE_DIR" "$FAKE_PROC_DIR"
+mkdir -p "$ALPINE_DIR" "$FAKE_PROC_DIR" \
+  "$FAKE_SYS_DIR/devices" \
+  "$FAKE_SYS_DIR/class/thermal" \
+  "$FAKE_SYS_DIR/class/hwmon" \
+  "$FAKE_SYS_DIR/class/power_supply" \
+  "$FAKE_SYS_DIR/dev"
 
 if [ -z "$(ls -A "$ALPINE_DIR" | grep -vE '^(root|tmp)$')" ]; then
     tar -xf "$PREFIX/files/alpine.tar.gz" -C "$ALPINE_DIR"
@@ -80,8 +86,8 @@ write_fake_proc_stat() {
   } > "$stat_file"
 }
 
-# Some Android kernels expose /proc/stat in a way btop cannot parse through proot.
-# A static compatibility file avoids crashes and avoids noisy background updater errors.
+# Compatibility for tools that expect desktop Linux procfs/sysfs.
+# Android often exposes restricted /proc and /sys entries through proot.
 write_fake_proc_stat
 
 ARGS="--kill-on-exit"
@@ -126,6 +132,11 @@ fi
 
 ARGS="$ARGS -b $PREFIX"
 ARGS="$ARGS -b /sys"
+ARGS="$ARGS -b $FAKE_SYS_DIR/devices:/sys/devices"
+ARGS="$ARGS -b $FAKE_SYS_DIR/class/thermal:/sys/class/thermal"
+ARGS="$ARGS -b $FAKE_SYS_DIR/class/hwmon:/sys/class/hwmon"
+ARGS="$ARGS -b $FAKE_SYS_DIR/class/power_supply:/sys/class/power_supply"
+ARGS="$ARGS -b $FAKE_SYS_DIR/dev:/sys/dev"
 
 if [ ! -d "$PREFIX/local/alpine/tmp" ]; then
  mkdir -p "$PREFIX/local/alpine/tmp"
