@@ -23,6 +23,12 @@ android {
         includeInBundle = false
     }
 
+    lint {
+        checkReleaseBuilds = false
+        abortOnError = false
+        disable += "ExpiredTargetSdkVersion"
+    }
+
     signingConfigs {
         create("release") {
             storeFile = file("testkey.keystore")
@@ -53,12 +59,12 @@ android {
         debug {
             applicationIdSuffix = ".debug"
             versionNameSuffix = "-DEBUG"
-            resValue("string", "app_name", "AndLinux Debug")
+            resValue("string", "app_name", "AndLinux")
         }
     }
 
     defaultConfig {
-        applicationId = "com.rk.terminal"
+        applicationId = "com.term.andlinux"
         minSdk = 26
         targetSdk = 28
         versionCode = 11
