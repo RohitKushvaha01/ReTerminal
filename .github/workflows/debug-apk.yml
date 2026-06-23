@@ -1,4 +1,4 @@
-name: Build AndLinux Alpha APK
+name: Build AndLinux Beta APK
 
 on:
   workflow_dispatch:
@@ -11,8 +11,8 @@ on:
       - '**/*.md'
 
 jobs:
-  alpha-apk:
-    name: Build installable alpha APK
+  beta-apk:
+    name: Build installable beta APK
     runs-on: ubuntu-latest
 
     steps:
@@ -29,7 +29,7 @@ jobs:
       - name: Prepare Gradle
         run: chmod +x gradlew
 
-      - name: Build alpha APK
+      - name: Build APK
         run: ./gradlew --no-daemon assembleFdroidAlpha
 
       - name: Rename APK
@@ -40,5 +40,5 @@ jobs:
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
-          name: Andlinux-apk
+          name: Andlinux-beta-apk
           path: artifacts/Andlinux.apk
