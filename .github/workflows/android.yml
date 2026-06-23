@@ -2,6 +2,11 @@ name: Build AndLinux APK
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - '.github/workflows/android.yml'
 
 jobs:
   build-release:
