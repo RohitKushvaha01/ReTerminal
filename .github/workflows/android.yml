@@ -40,4 +40,4 @@ jobs:
         with:
           name: Andlinux-apk
           path: artifacts/Andlinux.apk
-# AndLinux stable build workflow: themes update
+# AndLinux stable build workflow: app-wide terminal themes
