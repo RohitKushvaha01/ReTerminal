@@ -1,18 +1,11 @@
-name: Build AndLinux Beta APK
+name: Build AndLinux APK
 
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - main
-      - dev
-      - reterminal-fork
-    paths-ignore:
-      - '**/*.md'
 
 jobs:
-  beta-apk:
-    name: Build installable beta APK
+  build-apk:
+    name: Build installable APK
     runs-on: ubuntu-latest
 
     steps:
@@ -29,16 +22,16 @@ jobs:
       - name: Prepare Gradle
         run: chmod +x gradlew
 
-      - name: Build beta APK
-        run: ./gradlew --no-daemon assembleFdroidBeta
+      - name: Build APK
+        run: ./gradlew --no-daemon assembleFdroidRelease
 
       - name: Rename APK
         run: |
           mkdir -p artifacts
-          cp app/build/outputs/apk/Fdroid/beta/*.apk artifacts/Andlinux.apk
+          cp app/build/outputs/apk/Fdroid/release/*.apk artifacts/Andlinux.apk
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
-          name: Andlinux-beta-apk
+          name: Andlinux-apk
           path: artifacts/Andlinux.apk
