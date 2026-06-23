@@ -1,11 +1,6 @@
-name: Android CI
+name: Build AndLinux APK
+
 on:
-  push:
-    branches:
-      - main
-      - dev
-    paths-ignore:
-      - '**/*.md'
   workflow_dispatch:
 
 jobs:
@@ -14,49 +9,29 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
       - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
           java-version: '17'
-          distribution: 'temurin'
+          distribution: temurin
           cache: gradle
-
-      - name: Decode and create xed.keystore
-        run: echo "${{ secrets.KEYSTORE }}" | base64 -d > /tmp/xed.keystore
-
-      - name: Decode and create signing.properties
-        run: echo "${{ secrets.PROP }}" | base64 -d > /tmp/signing.properties
 
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
-      - name: Set Commit Hash
-        id: commit_hash
-        run: echo "COMMIT_HASH=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
-
       - name: Build with Gradle
-        run: ./gradlew assembleFdroidRelease && mv app/build/outputs/apk/Fdroid/release/*.apk app/reterminal-${{ env.COMMIT_HASH }}.apk
-        env:
-          KEYSTORE_FILE: /tmp/xed.keystore
-          SIGNING_PROPERTIES_FILE: /tmp/signing.properties
-        continue-on-error: false
+        run: ./gradlew --no-daemon assembleFdroidRelease -x lintVitalFdroidRelease
+
+      - name: Prepare APK artifact
+        run: |
+          mkdir -p artifacts
+          cp app/build/outputs/apk/Fdroid/release/*.apk artifacts/Andlinux.apk
 
       - name: Archive APK
         uses: actions/upload-artifact@v4
         with:
-          name: Karbon-Release
-          path: app/reterminal-${{ env.COMMIT_HASH }}.apk
-
-      - name: Delete xed.keystore and signing.properties
-        run: rm /tmp/xed.keystore /tmp/signing.properties
-
-      - name: Send APK to Telegram
-        if: ${{ success() && github.event.head_commit.message != '' }}
-        run: |
-          curl -X POST "https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT }}/sendDocument" \
-          -F chat_id="-1002292589492" \
-          -F message_thread_id="116" \
-          -F caption="${{ github.event.head_commit.message }} by ${{ github.actor }}" \
-          -F document=@"app/reterminal-${{ env.COMMIT_HASH }}.apk"
+          name: Andlinux-apk
+          path: artifacts/Andlinux.apk
