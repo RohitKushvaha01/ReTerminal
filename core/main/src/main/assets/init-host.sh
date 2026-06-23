@@ -2,12 +2,7 @@ ALPINE_DIR=$PREFIX/local/alpine
 FAKE_PROC_DIR=$PREFIX/local/proc-fake
 FAKE_SYS_DIR=$PREFIX/local/sys-fake
 
-mkdir -p "$ALPINE_DIR" "$FAKE_PROC_DIR" \
-  "$FAKE_SYS_DIR/devices" \
-  "$FAKE_SYS_DIR/class/thermal" \
-  "$FAKE_SYS_DIR/class/hwmon" \
-  "$FAKE_SYS_DIR/class/power_supply" \
-  "$FAKE_SYS_DIR/dev"
+mkdir -p "$ALPINE_DIR" "$FAKE_PROC_DIR" "$FAKE_SYS_DIR"
 
 if [ -z "$(ls -A "$ALPINE_DIR" | grep -vE '^(root|tmp)$')" ]; then
     tar -xf "$PREFIX/files/alpine.tar.gz" -C "$ALPINE_DIR"
@@ -20,14 +15,19 @@ for sofile in "$PREFIX/files/"*.so.2; do
     [ ! -e "$dest" ] && cp "$sofile" "$dest"
 done
 
-write_fake_proc_stat() {
-  now=$(date +%s)
+get_cpu_count() {
   cpu_count=$(grep -c '^processor' /proc/cpuinfo 2>/dev/null)
   case "$cpu_count" in
     ''|*[!0-9]*) cpu_count=8 ;;
   esac
   [ "$cpu_count" -lt 1 ] && cpu_count=8
   [ "$cpu_count" -gt 32 ] && cpu_count=32
+  echo "$cpu_count"
+}
+
+write_fake_proc_stat() {
+  now=$(date +%s)
+  cpu_count=$(get_cpu_count)
 
   total_user=0
   total_nice=0
@@ -86,9 +86,42 @@ write_fake_proc_stat() {
   } > "$stat_file"
 }
 
-# Compatibility for tools that expect desktop Linux procfs/sysfs.
-# Android often exposes restricted /proc and /sys entries through proot.
+write_fake_sysfs() {
+  cpu_count=$(get_cpu_count)
+  last_cpu=$((cpu_count - 1))
+
+  rm -rf "$FAKE_SYS_DIR"
+  mkdir -p \
+    "$FAKE_SYS_DIR/dev" \
+    "$FAKE_SYS_DIR/class/thermal" \
+    "$FAKE_SYS_DIR/class/hwmon" \
+    "$FAKE_SYS_DIR/class/power_supply" \
+    "$FAKE_SYS_DIR/devices/system/cpu" \
+    "$FAKE_SYS_DIR/devices/virtual/dmi/id"
+
+  echo "0-$last_cpu" > "$FAKE_SYS_DIR/devices/system/cpu/possible"
+  echo "0-$last_cpu" > "$FAKE_SYS_DIR/devices/system/cpu/present"
+  echo "0-$last_cpu" > "$FAKE_SYS_DIR/devices/system/cpu/online"
+  echo "AndLinux" > "$FAKE_SYS_DIR/devices/virtual/dmi/id/sys_vendor"
+  echo "Android proot" > "$FAKE_SYS_DIR/devices/virtual/dmi/id/product_name"
+
+  i=0
+  while [ "$i" -lt "$cpu_count" ]; do
+    cpu_dir="$FAKE_SYS_DIR/devices/system/cpu/cpu$i"
+    mkdir -p "$cpu_dir/cpufreq" "$cpu_dir/topology"
+    echo 1 > "$cpu_dir/online"
+    echo 1200000 > "$cpu_dir/cpufreq/scaling_cur_freq"
+    echo 300000 > "$cpu_dir/cpufreq/cpuinfo_min_freq"
+    echo 2400000 > "$cpu_dir/cpufreq/cpuinfo_max_freq"
+    echo "$i" > "$cpu_dir/topology/core_id"
+    echo 0 > "$cpu_dir/topology/physical_package_id"
+    i=$((i + 1))
+  done
+}
+
+# Desktop Linux compatibility for tools that read procfs/sysfs directly.
 write_fake_proc_stat
+write_fake_sysfs
 
 ARGS="--kill-on-exit"
 ARGS="$ARGS -w /"
@@ -131,12 +164,7 @@ if [ -e "/proc/self/fd/2" ]; then
 fi
 
 ARGS="$ARGS -b $PREFIX"
-ARGS="$ARGS -b /sys"
-ARGS="$ARGS -b $FAKE_SYS_DIR/devices:/sys/devices"
-ARGS="$ARGS -b $FAKE_SYS_DIR/class/thermal:/sys/class/thermal"
-ARGS="$ARGS -b $FAKE_SYS_DIR/class/hwmon:/sys/class/hwmon"
-ARGS="$ARGS -b $FAKE_SYS_DIR/class/power_supply:/sys/class/power_supply"
-ARGS="$ARGS -b $FAKE_SYS_DIR/dev:/sys/dev"
+ARGS="$ARGS -b $FAKE_SYS_DIR:/sys"
 
 if [ ! -d "$PREFIX/local/alpine/tmp" ]; then
  mkdir -p "$PREFIX/local/alpine/tmp"
