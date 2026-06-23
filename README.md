@@ -1,14 +1,12 @@
 # AndLinux
 
-**AndLinux** is a mobile Linux terminal environment for Android. It is based on the original ReTerminal codebase, but this fork focuses on a cleaner Alpine/proot workflow, stable keyboard input, practical shell selection and an installable alpha build.
+**AndLinux** is a mobile Linux terminal environment for Android. It is based on ReTerminal and focuses on a clean Alpine/proot workflow, stable mobile keyboard input, shell selection and an installable beta APK.
 
-The project is designed for phones without root access.
-
-## Current status
+## Status
 
 ```text
-Channel: Alpha
-Version: 1.3.0-alpha
+Channel: Beta
+Version: 1.4.0-beta
 Default Linux environment: Alpine Linux
 Root required: No
 ```
@@ -16,35 +14,21 @@ Root required: No
 ## Features
 
 - Material 3 terminal interface.
-- Alpine Linux environment through proot.
+- Alpine Linux through proot.
 - Android shell mode.
-- Multiple terminal sessions.
-- Virtual keys for terminal work.
+- Multiple sessions.
+- Virtual terminal keys.
 - Configurable keyboard shortcuts.
-- Custom font support.
-- Custom background support.
-- Terminal font size configuration.
+- Custom font and background support.
 - Status bar, title bar and virtual key toggles.
-- Default shell selector for Alpine sessions:
-  - `ash`
-  - `bash`
-  - `fish`
-  - `zsh`
+- Alpine shell selector: `ash`, `bash`, `fish`, `zsh`.
 - Login-shell startup for the selected shell.
-- Fixed Alpine startup script refresh from bundled assets.
-- btop-compatible `/proc/stat` shim for Android/proot environments.
+- Refreshed bundled startup scripts on app update.
+- Safer `/proc/stat` compatibility layer for Android/proot.
 
 ## Keyboard behavior
 
-The input mode selector was removed from this fork. AndLinux keeps the original ReTerminal terminal input behavior because it commits typed characters immediately on Android keyboards that otherwise buffer words until `Space` is pressed.
-
-This is important for terminal commands such as:
-
-```sh
-exit
-apk update
-btop
-```
+AndLinux intentionally keeps the original terminal input path. The separate Input Mode selector was removed because it made some Android keyboards buffer words until `Space` was pressed.
 
 ## Shell selection
 
@@ -54,75 +38,51 @@ Open:
 Settings -> Default Shell
 ```
 
-Choose one of:
-
-```text
-ash   lightweight BusyBox shell
-bash  best script compatibility
-fish  modern interactive shell
-zsh   configurable power shell
-```
-
-Open a new terminal session after changing the shell.
-
-Inside Alpine, verify the active shell:
-
-```sh
-echo "$SHELL"
-echo "$0"
-```
+Choose `ash`, `bash`, `fish`, or `zsh`, then open a new session.
 
 ## btop note
 
-Android/proot can expose a `/proc/stat` format that some Linux tools do not parse correctly. AndLinux now binds a small generated `/proc/stat` file into the Alpine environment so tools such as `btop` can start instead of failing with:
+`btop` can still be device-dependent under Android/proot. The current build avoids the noisy background updater and provides a static compatibility `/proc/stat` file. If `btop` is still unreliable on a device, use:
 
-```text
-Failed to parse /proc/stat
+```sh
+htop
+top
+free -h
+vmstat
 ```
 
-The shim is compatibility-focused. It is not intended to be a perfect replacement for a native kernel procfs.
+## Debian and Arch plan
 
-## Building alpha APK
+Debian and Arch should be added through a real distribution manager, not through fake buttons. The planned flow is:
 
-The repository includes a GitHub Actions workflow:
+```text
+profile -> rootfs import/download -> checksum check -> per-distro directory -> proot launch
+```
+
+The beta keeps Alpine as the only bundled environment so the app stays stable.
+
+## Build beta APK
+
+GitHub Actions workflow:
 
 ```text
 .github/workflows/debug-apk.yml
 ```
 
-It builds an installable alpha APK:
+Build command:
 
 ```sh
-./gradlew --no-daemon assembleFdroidAlpha
+./gradlew --no-daemon assembleFdroidBeta
 ```
 
-The uploaded artifact is named:
+Output artifact:
 
 ```text
 Andlinux.apk
 ```
 
-Manual local build:
-
-```sh
-chmod +x gradlew
-./gradlew --no-daemon assembleFdroidAlpha
-```
-
-APK path:
+Local output path:
 
 ```text
-app/build/outputs/apk/Fdroid/alpha/*.apk
+app/build/outputs/apk/Fdroid/beta/*.apk
 ```
-
-## Roadmap
-
-- Distribution manager for more rootfs profiles.
-- Safer rootfs reset/import/export tools.
-- Built-in terminal color theme presets.
-- Better first-run setup screen.
-- Optional package bootstrap presets for developer tools.
-
-## License
-
-This fork keeps the upstream project licensing terms. See `LICENSE`.
