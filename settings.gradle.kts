@@ -17,7 +17,7 @@ pluginManagement {
      
     }
     plugins {
-        kotlin("jvm") version "2.1.10"
+        kotlin("jvm") version "2.3.20"
     }
 }
 dependencyResolutionManagement {
@@ -39,5 +39,4 @@ include(":core:main")
 
 include(":core:components")
 include(":core:resources")
-include(":core:terminal-emulator")
-include(":core:terminal-view")
+include(":core:proot")

@@ -5,6 +5,7 @@ import android.content.res.Configuration
 import android.util.Log
 import android.widget.Toast
 import androidx.annotation.StringRes
+import com.blankj.utilcode.util.ThreadUtils
 import com.rk.resources.getString
 import com.rk.terminal.BuildConfig
 import kotlinx.coroutines.CoroutineScope
@@ -16,52 +17,15 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
-
-@OptIn(DelicateCoroutinesApi::class)
-fun postIO(block: suspend CoroutineScope.() -> Unit) {
-    GlobalScope.launch(Dispatchers.IO, block = block)
-}
-
-suspend fun IO(block: suspend CoroutineScope.() -> Unit) {
-    withContext(Dispatchers.IO, block)
-}
-
-suspend fun Default(block: suspend CoroutineScope.() -> Unit) {
-    withContext(Dispatchers.Default, block)
-}
-
-suspend fun UI(block: suspend CoroutineScope.() -> Unit) {
-    withContext(Dispatchers.Main, block)
-}
-
-inline fun CoroutineScope.safeLaunch(
-    context: CoroutineContext = EmptyCoroutineContext,
-    crossinline block: suspend CoroutineScope.() -> Unit
-): Job {
-    return launch(context = context) {
-        runCatching { block() }.onFailure {
-            it.printStackTrace();
-            if (BuildConfig.DEBUG) {
-                throw it
-            }
-        }
-    }
-}
-
-inline fun CoroutineScope.safeToastLaunch(
-    context: CoroutineContext = EmptyCoroutineContext,
-    crossinline block: suspend CoroutineScope.() -> Unit
-): Job {
-    return launch(context = context) { toastCatching { block() } }
-}
+import kotlin.math.roundToInt
 
 
 @OptIn(DelicateCoroutinesApi::class)
-inline fun runOnUiThread(runnable: Runnable) {
+ fun runOnUiThread(runnable: Runnable) {
     GlobalScope.launch(Dispatchers.Main) { runnable.run() }
 }
 
-inline fun toast(@StringRes resId: Int) {
+fun toast(@StringRes resId: Int) {
     toast(resId.getString())
 }
 
@@ -74,26 +38,29 @@ fun toast(message: String?) {
         Log.w("TOAST", message)
         return
     }
-    runOnUiThread { Toast.makeText(application!!, message.toString(), Toast.LENGTH_SHORT).show() }
+    if (currentActivity.get() == null){
+        return
+    }
+    runOnUiThread { Toast.makeText(currentActivity.get(), message, Toast.LENGTH_SHORT).show() }
 }
 
-inline fun toast(e: Exception? = null) {
+ fun toast(e: Exception? = null) {
     e?.printStackTrace()
     if (e != null) {
         toast(e.message)
     }
 }
 
-inline fun toast(t: Throwable? = null) {
+ fun toast(t: Throwable? = null) {
     t?.printStackTrace()
     toast(t?.message)
 }
 
-inline fun String?.toastIt() {
+ fun String?.toastIt() {
     toast(this)
 }
 
-inline fun toastCatching(block: () -> Unit): Exception? {
+ fun toastCatching(block: () -> Unit): Exception? {
     try {
         block()
         return null
@@ -111,11 +78,11 @@ fun isDarkMode(ctx: Context): Boolean {
     return ((ctx.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES)
 }
 
-inline fun dpToPx(dp: Float, ctx: Context): Int {
+ fun dpToPx(dp: Float, ctx: Context): Int {
     val density = ctx.resources.displayMetrics.density
-    return Math.round(dp * density)
+    return (dp * density).roundToInt()
 }
 
-inline fun isMainThread(): Boolean {
-    return Thread.currentThread().name == "main"
+ fun isMainThread(): Boolean {
+    return ThreadUtils.isMainThread()
 }

@@ -1,11 +1,13 @@
 package com.rk.terminal
 
 import android.app.Application
+import android.content.Context
 import android.os.Build
 import android.os.StrictMode
 import com.github.anrwatchdog.ANRWatchDog
 import com.rk.libcommons.application
 import com.rk.resources.Res
+import com.rk.terminal.ui.screens.terminal.TerminalUtils
 import com.rk.update.UpdateManager
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
@@ -14,13 +16,11 @@ import kotlinx.coroutines.launch
 import java.io.File
 import java.util.concurrent.Executors
 
-
 class App : Application() {
 
-    @OptIn(DelicateCoroutinesApi::class)
     companion object {
-        fun getTempDir(): File {
-            val tmp = File(application!!.filesDir.parentFile, "tmp")
+        fun getTempDir(context: Context): File {
+            val tmp = File(context.cacheDir, "tmp")
             if (!tmp.exists()) {
                 tmp.mkdir()
             }
@@ -33,43 +33,32 @@ class App : Application() {
         super.onCreate()
         application = this
         Res.application = this
+        TerminalUtils.init(this)
 
         GlobalScope.launch(Dispatchers.IO) {
-            getTempDir().apply {
-                if (exists() && listFiles().isNullOrEmpty().not()){ deleteRecursively() }
+            getTempDir(this@App).apply {
+                if (exists() && listFiles().isNullOrEmpty().not()) {
+                    deleteRecursively()
+                }
             }
         }
 
-        //Thread.setDefaultUncaughtExceptionHandler(CrashHandler)
         ANRWatchDog().start()
 
-        UpdateManager().onUpdate()
+        UpdateManager(this).onUpdate()
 
-        if (BuildConfig.DEBUG){
+        if (BuildConfig.DEBUG) {
             StrictMode.setVmPolicy(
                 StrictMode.VmPolicy.Builder().apply {
                     detectAll()
                     penaltyLog()
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P){
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
                         penaltyListener(Executors.newSingleThreadExecutor()) { violation ->
-                            println(violation.message)
                             violation.printStackTrace()
-                            violation.cause?.let { throw it }
-                            println("vm policy error")
                         }
                     }
                 }.build()
             )
         }
-
-
-
-
-
     }
-
-    override fun onTrimMemory(level: Int) {
-        super.onTrimMemory(level)
-    }
-
 }

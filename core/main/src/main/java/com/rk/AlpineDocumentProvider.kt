@@ -14,8 +14,6 @@ import android.provider.DocumentsProvider
 import android.util.Log
 import android.webkit.MimeTypeMap
 import com.rk.libcommons.alpineHomeDir
-import com.rk.resources.getString
-import com.rk.resources.strings
 import java.io.File
 import java.io.FileNotFoundException
 import java.io.IOException
@@ -25,16 +23,16 @@ import java.util.Locale
 import com.rk.terminal.R
 
 class AlpineDocumentProvider : DocumentsProvider() {
+
+    private val baseDir: File get() = context!!.alpineHomeDir()
+
     override fun queryRoots(projection: Array<String>?): Cursor {
-        val result = MatrixCursor(
-            projection
-                ?: DEFAULT_ROOT_PROJECTION
-        )
+        val result = MatrixCursor(projection ?: DEFAULT_ROOT_PROJECTION)
         val applicationName = "ReTerminal"
 
         val row = result.newRow()
-        row.add(DocumentsContract.Root.COLUMN_ROOT_ID, getDocIdForFile(BASE_DIR))
-        row.add(DocumentsContract.Root.COLUMN_DOCUMENT_ID, getDocIdForFile(BASE_DIR))
+        row.add(DocumentsContract.Root.COLUMN_ROOT_ID, getDocIdForFile(baseDir))
+        row.add(DocumentsContract.Root.COLUMN_DOCUMENT_ID, getDocIdForFile(baseDir))
         row.add(DocumentsContract.Root.COLUMN_SUMMARY, null)
         row.add(
             DocumentsContract.Root.COLUMN_FLAGS,
@@ -42,17 +40,14 @@ class AlpineDocumentProvider : DocumentsProvider() {
         )
         row.add(DocumentsContract.Root.COLUMN_TITLE, applicationName)
         row.add(DocumentsContract.Root.COLUMN_MIME_TYPES, ALL_MIME_TYPES)
-        row.add(DocumentsContract.Root.COLUMN_AVAILABLE_BYTES, BASE_DIR.freeSpace)
+        row.add(DocumentsContract.Root.COLUMN_AVAILABLE_BYTES, baseDir.freeSpace)
         row.add(DocumentsContract.Root.COLUMN_ICON, R.mipmap.ic_launcher)
         return result
     }
 
     @Throws(FileNotFoundException::class)
     override fun queryDocument(documentId: String, projection: Array<String>?): Cursor {
-        val result = MatrixCursor(
-            projection
-                ?: DEFAULT_DOCUMENT_PROJECTION
-        )
+        val result = MatrixCursor(projection ?: DEFAULT_DOCUMENT_PROJECTION)
         includeFile(result, documentId, null)
         return result
     }
@@ -61,12 +56,9 @@ class AlpineDocumentProvider : DocumentsProvider() {
     override fun queryChildDocuments(
         parentDocumentId: String,
         projection: Array<String>?,
-        sortOrder: String?  // Changed from non-nullable to nullable
+        sortOrder: String?
     ): Cursor {
-        val result = MatrixCursor(
-            projection
-                ?: DEFAULT_DOCUMENT_PROJECTION
-        )
+        val result = MatrixCursor(projection ?: DEFAULT_DOCUMENT_PROJECTION)
         val parent = getFileForDocId(parentDocumentId)
         val files = parent.listFiles()
         if (files != null) {
@@ -101,9 +93,7 @@ class AlpineDocumentProvider : DocumentsProvider() {
         return AssetFileDescriptor(pfd, 0, file.length())
     }
 
-    override fun onCreate(): Boolean {
-        return true
-    }
+    override fun onCreate(): Boolean = true
 
     @Throws(FileNotFoundException::class)
     override fun createDocument(
@@ -115,7 +105,8 @@ class AlpineDocumentProvider : DocumentsProvider() {
         var newFile = File(parent, displayName)
         var noConflictId = 2
         while (newFile.exists()) {
-            newFile = File(parent, displayName + " (" + noConflictId++ + ")")
+            newFile = File(parent, "$displayName ($noConflictId)")
+            noConflictId++
         }
         try {
             val succeeded = if (DocumentsContract.Document.MIME_TYPE_DIR == mimeType) {
@@ -152,29 +143,18 @@ class AlpineDocumentProvider : DocumentsProvider() {
         query: String,
         projection: Array<String>?
     ): Cursor {
-        val result = MatrixCursor(
-            projection
-                ?: DEFAULT_DOCUMENT_PROJECTION
-        )
+        val result = MatrixCursor(projection ?: DEFAULT_DOCUMENT_PROJECTION)
         val parent = getFileForDocId(rootId)
-
-        // This example implementation searches file names for the query and doesn't rank search
-        // results, so we can stop as soon as we find a sufficient number of matches.  Other
-        // implementations might rank results and use other data about files, rather than the file
-        // name, to produce a match.
         val pending = LinkedList<File>()
         pending.add(parent)
 
         val MAX_SEARCH_RESULTS = 50
         while (!pending.isEmpty() && result.count < MAX_SEARCH_RESULTS) {
             val file = pending.removeFirst()
-            // Avoid directories outside the $HOME directory linked with symlinks (to avoid e.g. search
-            // through the whole SD card).
-            var isInsideHome: Boolean
-            try {
-                isInsideHome = file.canonicalPath.startsWith(alpineHomeDir().canonicalPath)
+            val isInsideHome: Boolean = try {
+                file.canonicalPath.startsWith(baseDir.canonicalPath)
             } catch (e: IOException) {
-                isInsideHome = true
+                true
             }
             if (isInsideHome) {
                 if (file.isDirectory) {
@@ -186,7 +166,6 @@ class AlpineDocumentProvider : DocumentsProvider() {
                 }
             }
         }
-
         return result
     }
 
@@ -194,44 +173,29 @@ class AlpineDocumentProvider : DocumentsProvider() {
         return documentId.startsWith(parentDocumentId)
     }
 
-    /**
-     * Add a representation of a file to a cursor.
-     *
-     * @param result the cursor to modify
-     * @param docId  the document ID representing the desired file (may be null if given file)
-     * @param file   the File object representing the desired file (may be null if given docID)
-     */
     @Throws(FileNotFoundException::class)
     private fun includeFile(result: MatrixCursor, docId: String?, file: File?) {
-        var docId = docId
-        var file = file
-        if (docId == null) {
-            docId = getDocIdForFile(file!!)
-        } else {
-            file = getFileForDocId(docId)
-        }
+        val finalDocId = docId ?: getDocIdForFile(file!!)
+        val finalFile = file ?: getFileForDocId(finalDocId)
 
         var flags = 0
-        if (file.isDirectory) {
-            if (file.canWrite()) flags =
-                flags or DocumentsContract.Document.FLAG_DIR_SUPPORTS_CREATE
-        } else if (file.canWrite()) {
+        if (finalFile.isDirectory) {
+            if (finalFile.canWrite()) flags = flags or DocumentsContract.Document.FLAG_DIR_SUPPORTS_CREATE
+        } else if (finalFile.canWrite()) {
             flags = flags or DocumentsContract.Document.FLAG_SUPPORTS_WRITE
         }
-        if (file.parentFile?.canWrite() == true) flags =
-            flags or DocumentsContract.Document.FLAG_SUPPORTS_DELETE
+        if (finalFile.parentFile?.canWrite() == true) flags = flags or DocumentsContract.Document.FLAG_SUPPORTS_DELETE
 
-        val displayName = file.name
-        val mimeType = getMimeType(file)
-        if (mimeType.startsWith("image/")) flags =
-            flags or DocumentsContract.Document.FLAG_SUPPORTS_THUMBNAIL
+        val displayName = finalFile.name
+        val mimeType = getMimeType(finalFile)
+        if (mimeType.startsWith("image/")) flags = flags or DocumentsContract.Document.FLAG_SUPPORTS_THUMBNAIL
 
         val row = result.newRow()
-        row.add(DocumentsContract.Document.COLUMN_DOCUMENT_ID, docId)
+        row.add(DocumentsContract.Document.COLUMN_DOCUMENT_ID, finalDocId)
         row.add(DocumentsContract.Document.COLUMN_DISPLAY_NAME, displayName)
-        row.add(DocumentsContract.Document.COLUMN_SIZE, file.length())
+        row.add(DocumentsContract.Document.COLUMN_SIZE, finalFile.length())
         row.add(DocumentsContract.Document.COLUMN_MIME_TYPE, mimeType)
-        row.add(DocumentsContract.Document.COLUMN_LAST_MODIFIED, file.lastModified())
+        row.add(DocumentsContract.Document.COLUMN_LAST_MODIFIED, finalFile.lastModified())
         row.add(DocumentsContract.Document.COLUMN_FLAGS, flags)
         row.add(DocumentsContract.Document.COLUMN_ICON, R.mipmap.ic_launcher)
     }
@@ -245,29 +209,13 @@ class AlpineDocumentProvider : DocumentsProvider() {
         }
 
         fun setDocumentProviderEnabled(context: Context, enabled: Boolean) {
-            if (isDocumentProviderEnabled(context) == enabled) {
-                return
-            }
+            if (isDocumentProviderEnabled(context) == enabled) return
             val componentName = ComponentName(context, AlpineDocumentProvider::class.java)
-            val newState = if (enabled)
-                PackageManager.COMPONENT_ENABLED_STATE_ENABLED
-            else
-                PackageManager.COMPONENT_ENABLED_STATE_DISABLED
-
-            context.packageManager.setComponentEnabledSetting(
-                componentName,
-                newState,
-                PackageManager.DONT_KILL_APP
-            )
+            val newState = if (enabled) PackageManager.COMPONENT_ENABLED_STATE_ENABLED else PackageManager.COMPONENT_ENABLED_STATE_DISABLED
+            context.packageManager.setComponentEnabledSetting(componentName, newState, PackageManager.DONT_KILL_APP)
         }
 
-
         private const val ALL_MIME_TYPES = "*/*"
-
-        private val BASE_DIR = alpineHomeDir()
-
-        // The default columns to return information about a root if no specific
-        // columns are requested in a query.
         private val DEFAULT_ROOT_PROJECTION = arrayOf(
             DocumentsContract.Root.COLUMN_ROOT_ID,
             DocumentsContract.Root.COLUMN_MIME_TYPES,
@@ -278,9 +226,6 @@ class AlpineDocumentProvider : DocumentsProvider() {
             DocumentsContract.Root.COLUMN_DOCUMENT_ID,
             DocumentsContract.Root.COLUMN_AVAILABLE_BYTES
         )
-
-        // The default columns to return information about a document if no specific
-        // columns are requested in a query.
         private val DEFAULT_DOCUMENT_PROJECTION = arrayOf(
             DocumentsContract.Document.COLUMN_DOCUMENT_ID,
             DocumentsContract.Document.COLUMN_MIME_TYPE,
@@ -290,19 +235,8 @@ class AlpineDocumentProvider : DocumentsProvider() {
             DocumentsContract.Document.COLUMN_SIZE
         )
 
-        /**
-         * Get the document id given a file. This document id must be consistent across time as other
-         * applications may save the ID and use it to reference documents later.
-         *
-         * The reverse of @{link #getFileForDocId}.
-         */
-        private fun getDocIdForFile(file: File): String {
-            return file.absolutePath
-        }
+        private fun getDocIdForFile(file: File): String = file.absolutePath
 
-        /**
-         * Get the file given a document id (the reverse of [.getDocIdForFile]).
-         */
         @Throws(FileNotFoundException::class)
         private fun getFileForDocId(docId: String): File {
             val f = File(docId)
@@ -311,18 +245,15 @@ class AlpineDocumentProvider : DocumentsProvider() {
         }
 
         private fun getMimeType(file: File): String {
-            if (file.isDirectory) {
-                return DocumentsContract.Document.MIME_TYPE_DIR
-            } else {
-                val name = file.name
-                val lastDot = name.lastIndexOf('.')
-                if (lastDot >= 0) {
-                    val extension = name.substring(lastDot + 1).lowercase(Locale.getDefault())
-                    val mime = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension)
-                    if (mime != null) return mime
-                }
-                return "application/octet-stream"
+            if (file.isDirectory) return DocumentsContract.Document.MIME_TYPE_DIR
+            val name = file.name
+            val lastDot = name.lastIndexOf('.')
+            if (lastDot >= 0) {
+                val extension = name.substring(lastDot + 1).lowercase(Locale.getDefault())
+                val mime = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension)
+                if (mime != null) return mime
             }
+            return "application/octet-stream"
         }
     }
 }

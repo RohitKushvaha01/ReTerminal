@@ -1,23 +1,22 @@
 package com.rk.terminal.ui.screens.terminal
 
-import android.os.Environment
+import android.content.Context
 import androidx.compose.runtime.mutableStateOf
-import com.rk.libcommons.application
 import com.rk.libcommons.child
-import com.rk.terminal.App
+import com.rk.libcommons.localDir
 import java.io.File
 
 object Rootfs {
-    val reTerminal = application!!.filesDir
+    var isInstalled = mutableStateOf(false)
 
-    init {
-        if (reTerminal.exists().not()){
-            reTerminal.mkdirs()
-        }
+    fun checkInstallation(context: Context) {
+        isInstalled.value = isRootfsInstalled(context)
     }
 
-    var isDownloaded = mutableStateOf(isFilesDownloaded())
-    fun isFilesDownloaded(): Boolean{
-        return reTerminal.exists() && reTerminal.child("proot").exists() && reTerminal.child("libtalloc.so.2").exists() && reTerminal.child("alpine.tar.gz").exists()
+    fun isRootfsInstalled(context: Context): Boolean {
+        val alpineDir = context.localDir().child("alpine")
+        val isExtracted = alpineDir.exists() && (alpineDir.list()?.any { it != "root" && it != "tmp" } == true)
+        val isArchivePresent = context.filesDir.child("alpine.tar.gz").exists()
+        return isExtracted || isArchivePresent
     }
 }

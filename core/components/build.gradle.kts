@@ -1,7 +1,6 @@
 plugins {
-    alias(libs.plugins.androidLibrary)
-    alias(libs.plugins.kotlinAndroid)
-    alias(libs.plugins.compose.compiler)
+    alias(libs.plugins.android.library)
+    alias(libs.plugins.kotlin.compose)
 }
 
 android {
@@ -23,20 +22,17 @@ android {
         targetCompatibility = JavaVersion.VERSION_17
     }
 
-    kotlinOptions {
-        jvmTarget = "17"
-    }
 }
 
 dependencies {
     implementation(libs.material)
-    implementation(libs.appcompat)
+    implementation(libs.androidx.appcompat)
     
-    implementation(platform(libs.compose.bom))
-    implementation(libs.material3)
+    implementation(platform(libs.androidx.compose.bom))
+    implementation(libs.androidx.compose.material3)
     implementation(libs.material)
-    implementation(libs.ui)
-    implementation(libs.ui.graphics)
-    implementation(libs.activity.compose)
-    api(libs.androidx.material.icons.core)
+    implementation(libs.androidx.compose.ui)
+    implementation(libs.androidx.compose.ui.graphics)
+    implementation(libs.androidx.activity.compose)
+    api(libs.androidx.compose.material.icons.core)
 }

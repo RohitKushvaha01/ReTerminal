@@ -6,14 +6,6 @@ if [ -z "$(ls -A "$ALPINE_DIR" | grep -vE '^(root|tmp)$')" ]; then
     tar -xf "$PREFIX/files/alpine.tar.gz" -C "$ALPINE_DIR"
 fi
 
-[ ! -e "$PREFIX/local/bin/proot" ] && cp "$PREFIX/files/proot" "$PREFIX/local/bin"
-
-for sofile in "$PREFIX/files/"*.so.2; do
-    dest="$PREFIX/local/lib/$(basename "$sofile")"
-    [ ! -e "$dest" ] && cp "$sofile" "$dest"
-done
-
-
 ARGS="--kill-on-exit"
 ARGS="$ARGS -w /"
 
@@ -71,4 +63,4 @@ ARGS="$ARGS --link2symlink"
 ARGS="$ARGS --sysvipc"
 ARGS="$ARGS -L"
 
-$LINKER $PREFIX/local/bin/proot $ARGS sh $PREFIX/local/bin/init "$@"
+$PROOT $ARGS sh $PREFIX/local/bin/init "$@"

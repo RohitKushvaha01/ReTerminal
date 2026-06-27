@@ -1,69 +1,73 @@
 package com.rk.terminal.service
 
-import android.app.*
+import android.app.Notification
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.app.PendingIntent
+import android.app.Service
 import android.content.Intent
 import android.content.pm.ServiceInfo
 import android.os.Binder
 import android.os.Build
 import android.os.IBinder
 import androidx.annotation.RequiresApi
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.core.app.NotificationCompat
 import com.rk.resources.drawables
 import com.rk.resources.strings
 import com.rk.terminal.ui.activities.terminal.MainActivity
-import com.rk.terminal.ui.screens.settings.Settings
 import com.rk.terminal.ui.screens.terminal.MkSession
 import com.termux.terminal.TerminalSession
 import com.termux.terminal.TerminalSessionClient
 
 class SessionService : Service() {
     private val sessions = hashMapOf<String, TerminalSession>()
-    val sessionList = mutableStateMapOf<String,Int>()
-    var currentSession = mutableStateOf(Pair("main",com.rk.settings.Settings.working_Mode))
+    val sessionList = mutableStateMapOf<String, Int>()
+    var currentSession = mutableStateOf(Pair("main", com.rk.settings.Settings.working_Mode))
 
     inner class SessionBinder : Binder() {
-        fun getService():SessionService{
-            return this@SessionService
-        }
-        fun terminateAllSessions(){
-            sessions.values.forEach{
-                it.finishIfRunning()
-            }
+        fun getService(): SessionService = this@SessionService
+        
+        fun terminateAllSessions() {
+            sessions.values.forEach { it.finishIfRunning() }
             sessions.clear()
             sessionList.clear()
             updateNotification()
         }
-        fun createSession(id: String, client: TerminalSessionClient, activity: MainActivity,workingMode:Int): TerminalSession {
-            return MkSession.createSession(activity, client, id, workingMode = workingMode).also {
+
+        fun createSession(
+            id: String,
+            client: TerminalSessionClient,
+            workingMode: Int
+        ): TerminalSession {
+            return MkSession.createSession(
+                context = this@SessionService,
+                sessionClient = client,
+                sessionId = id,
+                workingMode = workingMode
+            ).also {
                 sessions[id] = it
                 sessionList[id] = workingMode
                 updateNotification()
             }
         }
-        fun getSession(id: String): TerminalSession? {
-            return sessions[id]
-        }
+
+        fun getSession(id: String): TerminalSession? = sessions[id]
+
         fun terminateSession(id: String) {
-            runCatching {
-                //crash is here
-                sessions[id]?.apply {
-                    if (emulator != null){
-                        sessions[id]?.finishIfRunning()
-                    }
+            sessions[id]?.apply {
+                if (emulator != null) {
+                    finishIfRunning()
                 }
-
-                sessions.remove(id)
-                sessionList.remove(id)
-                if (sessions.isEmpty()) {
-                    stopSelf()
-                } else {
-                    updateNotification()
-                }
-            }.onFailure { it.printStackTrace() }
-
+            }
+            sessions.remove(id)
+            sessionList.remove(id)
+            if (sessions.isEmpty()) {
+                stopSelf()
+            } else {
+                updateNotification()
+            }
         }
     }
 
@@ -72,12 +76,10 @@ class SessionService : Service() {
         getSystemService(NotificationManager::class.java)
     }
 
-    override fun onBind(intent: Intent?): IBinder {
-        return binder
-    }
+    override fun onBind(intent: Intent?): IBinder = binder
 
     override fun onDestroy() {
-        sessions.forEach { s -> s.value.finishIfRunning() }
+        sessions.values.forEach { it.finishIfRunning() }
         super.onDestroy()
     }
 
@@ -95,13 +97,10 @@ class SessionService : Service() {
         }
     }
 
-
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        when (intent?.action) {
-            "ACTION_EXIT" -> {
-                sessions.forEach { s -> s.value.finishIfRunning() }
-                stopSelf()
-            }
+        if (intent?.action == "ACTION_EXIT") {
+            sessions.values.forEach { it.finishIfRunning() }
+            stopSelf()
         }
         return super.onStartCommand(intent, flags, startId)
     }
@@ -155,9 +154,6 @@ class SessionService : Service() {
 
     private fun getNotificationContentText(): String {
         val count = sessions.size
-        if (count == 1){
-            return "1 session running"
-        }
-        return "$count sessions running"
+        return if (count == 1) "1 session running" else "$count sessions running"
     }
 }
