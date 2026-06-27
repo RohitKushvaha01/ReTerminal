@@ -39,6 +39,7 @@ fun TerminalViewLayout(
                 TerminalView(ctx, null).apply {
                     viewModel.setTerminalView(this)
                     setTextSize(dpToPx(Settings.terminal_font_size.toFloat(), ctx))
+                    setBackgroundColor(android.graphics.Color.TRANSPARENT)
                     
                     val client = TerminalBackEnd(this, mainActivity)
                     val service = sessionBinder.getService()
@@ -57,12 +58,14 @@ fun TerminalViewLayout(
 
                     post {
                         val color = TerminalUtils.getViewColor()
+                        val bgColor = TerminalUtils.getBackgroundColor()
                         keepScreenOn = true
                         requestFocus()
                         isFocusableInTouchMode = true
 
                         mEmulator?.mColors?.mCurrentColors?.apply {
                             set(256, color)
+                            set(257, bgColor)
                             set(258, color)
                         }
 
@@ -79,8 +82,10 @@ fun TerminalViewLayout(
             update = { view ->
                 view.onScreenUpdated()
                 val color = TerminalUtils.getViewColor()
+                val bgColor = TerminalUtils.getBackgroundColor()
                 view.mEmulator?.mColors?.mCurrentColors?.apply {
                     set(256, color)
+                    set(257, bgColor)
                     set(258, color)
                 }
             }

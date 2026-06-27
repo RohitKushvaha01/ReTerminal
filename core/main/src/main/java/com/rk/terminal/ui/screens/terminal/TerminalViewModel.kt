@@ -30,6 +30,7 @@ class TerminalViewModel : ViewModel() {
 
     var bitmap by mutableStateOf<ImageBitmap?>(null)
     var wallAlpha by mutableFloatStateOf(Settings.wallTransparency)
+    var backgroundBlur by mutableFloatStateOf(Settings.background_blur)
 
     var showToolbar by mutableStateOf(Settings.toolbar)
     var showVirtualKeys by mutableStateOf(Settings.virtualKeys)
@@ -52,6 +53,7 @@ class TerminalViewModel : ViewModel() {
             ?: sessionBinder.createSession(sessionId, client, Settings.working_Mode)
             
         session.updateTerminalSessionClient(client)
+        terminal.setBackgroundColor(android.graphics.Color.TRANSPARENT)
         terminal.attachSession(session)
         terminal.setTerminalViewClient(client)
         
@@ -64,6 +66,7 @@ class TerminalViewModel : ViewModel() {
 
             terminal.mEmulator?.mColors?.mCurrentColors?.apply {
                 set(256, typedValue.data)
+                set(257, TerminalUtils.getBackgroundColor())
                 set(258, typedValue.data)
             }
         }

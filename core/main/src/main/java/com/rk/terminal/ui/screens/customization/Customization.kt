@@ -46,8 +46,9 @@ private const val MAX_TEXT_SIZE = 20f
 
 @Composable
 fun Customization(
-    mainViewModel: MainViewModel = viewModel(),
-    terminalViewModel: TerminalViewModel = viewModel()
+    mainActivity: com.rk.terminal.ui.activities.terminal.MainActivity,
+    mainViewModel: MainViewModel = viewModel(mainActivity),
+    terminalViewModel: TerminalViewModel = viewModel(mainActivity)
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
@@ -90,6 +91,21 @@ fun Customization(
                     value = terminalViewModel.wallAlpha,
                     onValueChange = { terminalViewModel.wallAlpha = it },
                     onValueChangeFinished = { Settings.wallTransparency = terminalViewModel.wallAlpha }
+                )
+            }
+        }
+
+        PreferenceGroup() {
+            PreferenceTemplate(title = { Text("Background Blur") }) {
+                Text(terminalViewModel.backgroundBlur.toInt().toString())
+            }
+            PreferenceTemplate(title = {}) {
+                Slider(
+                    value = terminalViewModel.backgroundBlur,
+                    onValueChange = { terminalViewModel.backgroundBlur = it },
+                    onValueChangeFinished = { Settings.background_blur = terminalViewModel.backgroundBlur },
+                    valueRange = 0f..25f,
+                    steps = 24
                 )
             }
         }

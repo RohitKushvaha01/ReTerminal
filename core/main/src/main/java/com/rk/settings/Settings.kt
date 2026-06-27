@@ -58,6 +58,10 @@ object Settings {
         get() = Preference.getString(key = "custom_ttf_name", default = "No Font Selected")
         set(value) = Preference.setString(key = "custom_ttf_name",value)
 
+    var background_blur
+        get() = Preference.getFloat(key = "background_blur", default = 0f)
+        set(value) = Preference.setFloat(key = "background_blur", value)
+
     var blackTextColor
         get() = Preference.getBoolean(key = "blackText", default = false)
         set(value) = Preference.setBoolean(key = "blackText",value)

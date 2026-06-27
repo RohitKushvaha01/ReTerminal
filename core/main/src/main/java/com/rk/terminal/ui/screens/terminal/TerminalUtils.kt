@@ -20,6 +20,11 @@ object TerminalUtils {
 
     fun getViewColor(): Int = if (darkText.value) Color.BLACK else Color.WHITE
 
+    fun getBackgroundColor(): Int {
+        val baseColor = if (darkText.value) Color.WHITE else Color.BLACK
+        return androidx.core.graphics.ColorUtils.setAlphaComponent(baseColor, (255 * 0.3f).toInt())
+    }
+
     fun getComposeColor(): androidx.compose.ui.graphics.Color =
         if (darkText.value) androidx.compose.ui.graphics.Color.Black else androidx.compose.ui.graphics.Color.White
 

@@ -16,6 +16,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.blur
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
@@ -45,7 +46,7 @@ fun TerminalScreen(
     mainActivity: MainActivity,
     navController: NavController,
     mainViewModel: MainViewModel = viewModel(mainActivity),
-    terminalViewModel: TerminalViewModel = viewModel()
+    terminalViewModel: TerminalViewModel = viewModel(mainActivity)
 ) {
     val context = LocalContext.current
     val isDarkMode = isSystemInDarkTheme()
@@ -149,14 +150,21 @@ fun TerminalScreen(
 
 @Composable
 private fun BackgroundImage(viewModel: TerminalViewModel) {
-    viewModel.bitmap?.let {
+    viewModel.bitmap?.let { bitmap ->
         Image(
-            bitmap = it,
+            bitmap = bitmap,
             contentDescription = null,
             contentScale = ContentScale.Crop,
             modifier = Modifier
                 .fillMaxSize()
                 .alpha(viewModel.wallAlpha)
+                .let {
+                    if (viewModel.backgroundBlur > 0f) {
+                        it.blur(viewModel.backgroundBlur.dp)
+                    } else {
+                        it
+                    }
+                }
                 .zIndex(-1f)
         )
     }
