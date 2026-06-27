@@ -23,6 +23,10 @@ jobs:
           distribution: 'temurin'
           cache: gradle
 
+      - name: Accept Android SDK Licenses
+        run: |
+          yes | sdkmanager --licenses
+
       - name: Decode and create xed.keystore
         run: echo "${{ secrets.KEYSTORE }}" | base64 -d > /tmp/xed.keystore
 

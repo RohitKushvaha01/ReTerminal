@@ -39,6 +39,7 @@ fun TopBar(
     modifier: Modifier = Modifier,
     scrollBehavior: TopAppBarScrollBehavior? = null,
     actions: @Composable RowScope.() -> Unit = {},
+    onBack: (() -> Unit)? = null
 ) {
     val backDispatcher = LocalOnBackPressedDispatcherOwner.current?.onBackPressedDispatcher
 
@@ -51,7 +52,13 @@ fun TopBar(
                 if (backArrowVisible) {
                     ClickableIcon(
                         imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
-                        onClick = { backDispatcher?.onBackPressed() },
+                        onClick = {
+                            if (onBack != null) {
+                                onBack()
+                            } else {
+                                backDispatcher?.onBackPressed()
+                            }
+                        },
                     )
                 }
             },
@@ -66,7 +73,13 @@ fun TopBar(
                 if (backArrowVisible) {
                     ClickableIcon(
                         imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
-                        onClick = { backDispatcher?.onBackPressed() },
+                        onClick = {
+                            if (onBack != null) {
+                                onBack()
+                            } else {
+                                backDispatcher?.onBackPressed()
+                            }
+                        },
                     )
                 }
             },

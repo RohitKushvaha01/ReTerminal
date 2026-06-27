@@ -51,6 +51,7 @@ fun PreferenceLayout(
     label: String,
     modifier: Modifier = Modifier,
     backArrowVisible: Boolean = true,
+    onBack: (() -> Unit)? = null,
     isExpandedScreen: Boolean = LocalIsExpandedScreen.current,
     verticalArrangement: Arrangement.Vertical = Arrangement.spacedBy(8.dp),
     horizontalAlignment: Alignment.Horizontal = Alignment.Start,
@@ -63,6 +64,7 @@ fun PreferenceLayout(
     PreferenceScaffold(
         modifier = modifier,
         backArrowVisible = backArrowVisible,
+        onBack = onBack,
         label = label,
         isExpandedScreen = isExpandedScreen,
         actions = actions,
@@ -102,12 +104,14 @@ fun PreferenceLayoutLazyColumn(
     isExpandedScreen: Boolean = LocalIsExpandedScreen.current,
     enabled: Boolean = true,
     backArrowVisible: Boolean = true,
+    onBack: (() -> Unit)? = null,
     state: LazyListState = rememberLazyListState(),
     actions: @Composable RowScope.() -> Unit = {},
     content: LazyListScope.() -> Unit,
 ) {
     PreferenceScaffold(
         backArrowVisible = backArrowVisible,
+        onBack = onBack,
         label = label,
         isExpandedScreen = isExpandedScreen,
         actions = actions,

@@ -22,6 +22,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
 import androidx.palette.graphics.Palette
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.rk.components.compose.preferences.base.PreferenceGroup
@@ -47,13 +48,17 @@ private const val MAX_TEXT_SIZE = 20f
 @Composable
 fun Customization(
     mainActivity: com.rk.terminal.ui.activities.terminal.MainActivity,
+    navController: NavController,
     mainViewModel: MainViewModel = viewModel(mainActivity),
     terminalViewModel: TerminalViewModel = viewModel(mainActivity)
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
 
-    PreferenceLayout(label = stringResource(strings.customizations)) {
+    PreferenceLayout(
+        label = stringResource(strings.customizations),
+        onBack = { navController.popBackStack() }
+    ) {
         var sliderPosition by remember { mutableFloatStateOf(Settings.terminal_font_size.toFloat()) }
         
         PreferenceGroup {

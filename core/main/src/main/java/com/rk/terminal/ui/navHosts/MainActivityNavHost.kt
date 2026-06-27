@@ -61,7 +61,7 @@ fun MainActivityNavHost(
         
         composable(MainActivityRoutes.Customization.route) {
             UpdateStatusBar(mainActivity.window, true)
-            Customization(mainActivity = mainActivity)
+            Customization(mainActivity = mainActivity, navController = navController)
         }
     }
 }

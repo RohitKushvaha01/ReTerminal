@@ -79,7 +79,11 @@ fun Settings(
     var selectedWorkingMode by remember { mutableIntStateOf(Settings.working_Mode) }
     var selectedInputMode by remember { mutableIntStateOf(Settings.input_mode) }
 
-    PreferenceLayout(label = stringResource(strings.settings), modifier = modifier) {
+    PreferenceLayout(
+        label = stringResource(strings.settings),
+        modifier = modifier,
+        onBack = { navController.popBackStack() }
+    ) {
         PreferenceGroup(heading = stringResource(strings.default_working_mode)) {
             WorkingModeOption("Alpine", stringResource(strings.alpine_desc), WorkingMode.ALPINE, selectedWorkingMode) {
                 selectedWorkingMode = it
