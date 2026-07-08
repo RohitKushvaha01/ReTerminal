@@ -38,11 +38,29 @@ object MkSession {
 
             val workingDir = pendingCommand?.workingDir ?: alpineHomeDir().path
 
+            val useChroot = Rootfs.execMode.value == ExecMode.CHROOT
+
             val initFile: File = localBinDir().child("init-host")
             if (initFile.exists().not()) {
                 initFile.createFileIfNot()
                 assets.open("init-host.sh").bufferedReader().use { it.readText() }.let {
                     initFile.writeText(it)
+                }
+            }
+
+            val initChrootFile: File = localBinDir().child("init-host-chroot")
+            if (useChroot && initChrootFile.exists().not()) {
+                initChrootFile.createFileIfNot()
+                assets.open("init-host-chroot.sh").bufferedReader().use { it.readText() }.let {
+                    initChrootFile.writeText(it)
+                }
+            }
+
+            val cleanupFile: File = localBinDir().child("cleanup-stale-mounts.sh")
+            if (cleanupFile.exists().not()) {
+                cleanupFile.createFileIfNot()
+                assets.open("cleanup-stale-mounts.sh").bufferedReader().use { it.readText() }.let {
+                    cleanupFile.writeText(it)
                 }
             }
 
@@ -75,6 +93,8 @@ object MkSession {
                 "TMPDIR=${getTempDir(this).absolutePath}",
                 "PROOT_LOADER=${applicationInfo.nativeLibraryDir}/libloader.so",
                 "PROOT=${applicationInfo.nativeLibraryDir}/libproot.so",
+                "CHROOT=${if (File("/system/bin/chroot").exists()) "/system/bin/chroot" else "/system/xbin/chroot"}",
+                "USE_CHROOT=${if (useChroot) "1" else "0"}",
             )
 
             val loader32 = "${applicationInfo.nativeLibraryDir}/libloader32.so"
@@ -103,7 +123,8 @@ object MkSession {
             val args: Array<String>
             val shell = if (pendingCommand == null) {
                 args = if (workingMode == WorkingMode.ALPINE) {
-                    arrayOf("-c", initFile.absolutePath)
+                    val targetInit = if (useChroot) initChrootFile else initFile
+                    arrayOf("-c", targetInit.absolutePath)
                 } else {
                     arrayOf()
                 }
@@ -122,6 +143,37 @@ object MkSession {
                 sessionClient,
             )
         }
+    }
+
+    fun buildCustomPendingCommand(context: Context, custom: CustomSession): PendingCommand {
+        val scriptFile = File(custom.shellPath)
+        val sysSh = File("/system/bin/sh")
+
+        val shell: String
+        val args: Array<String>
+
+        if (sysSh.canExecute()) {
+            shell = sysSh.absolutePath
+            args = arrayOf("-c", scriptFile.absolutePath)
+        } else {
+            val proot = "${context.applicationInfo.nativeLibraryDir}/libproot.so"
+            shell = proot
+            args = arrayOf(
+                "-r", "/",
+                "-b", "/dev",
+                "-b", "/proc",
+                "-b", "/sdcard",
+                "-0",
+                "sh", scriptFile.absolutePath
+            )
+        }
+
+        return PendingCommand(
+            shell = shell,
+            args = args,
+            workingDir = scriptFile.parentFile?.absolutePath ?: "/sdcard/ReTerminal",
+            env = null
+        )
     }
 }
 

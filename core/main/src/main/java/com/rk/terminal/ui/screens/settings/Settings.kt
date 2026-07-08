@@ -9,6 +9,8 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.KeyboardArrowRight
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -25,6 +27,9 @@ import com.rk.settings.Settings
 import com.rk.terminal.ui.activities.terminal.MainActivity
 import com.rk.terminal.ui.components.SettingsToggle
 import com.rk.terminal.ui.routes.MainActivityRoutes
+import com.rk.terminal.ui.screens.terminal.CustomSessions
+import com.rk.terminal.ui.screens.terminal.ExecMode
+import com.rk.terminal.ui.screens.terminal.Rootfs
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -78,6 +83,9 @@ fun Settings(
     val context = LocalContext.current
     var selectedWorkingMode by remember { mutableIntStateOf(Settings.working_Mode) }
     var selectedInputMode by remember { mutableIntStateOf(Settings.input_mode) }
+    var selectedExecMode by remember { mutableStateOf(Rootfs.execMode.value) }
+    var customSessions by remember { mutableStateOf(CustomSessions.getAll()) }
+    var showAddCustomSession by remember { mutableStateOf(false) }
 
     PreferenceLayout(
         label = stringResource(strings.settings),
@@ -95,6 +103,17 @@ fun Settings(
             }
         }
 
+        PreferenceGroup(heading = "Execution Mode") {
+            ExecModeOption("Chroot", "Requires root, faster, real bind mounts", ExecMode.CHROOT, selectedExecMode) {
+                selectedExecMode = it
+                Rootfs.setExecMode(it)
+            }
+            ExecModeOption("Proot", "No root required, slightly slower", ExecMode.PROOT, selectedExecMode) {
+                selectedExecMode = it
+                Rootfs.setExecMode(it)
+            }
+        }
+
         PreferenceGroup(heading = stringResource(strings.input_mode)) {
             InputModeOption(stringResource(strings.input_mode_default), stringResource(strings.input_mode_default_desc), InputMode.DEFAULT, selectedInputMode) {
                 selectedInputMode = it
@@ -108,6 +127,35 @@ fun Settings(
                 selectedInputMode = it
                 Settings.input_mode = it
             }
+        }
+
+        PreferenceGroup(heading = "Custom Sessions") {
+            customSessions.forEach { session ->
+                SettingsCard(
+                    title = { Text(session.name) },
+                    description = { Text(session.shellPath) },
+                    onClick = {},
+                    endWidget = {
+                        IconButton(onClick = {
+                            CustomSessions.remove(session.id)
+                            customSessions = CustomSessions.getAll()
+                        }) {
+                            Icon(imageVector = Icons.Outlined.Delete, contentDescription = null)
+                        }
+                    }
+                )
+            }
+            SettingsCard(
+                title = { Text("Add Custom Session") },
+                onClick = { showAddCustomSession = true },
+                endWidget = {
+                    Icon(
+                        imageVector = Icons.Default.Add,
+                        contentDescription = null,
+                        modifier = Modifier.padding(16.dp)
+                    )
+                }
+            )
         }
 
         PreferenceGroup {
@@ -153,6 +201,19 @@ fun Settings(
             )
         }
     }
+
+    if (showAddCustomSession) {
+        CustomSessionDialog(
+            onDismiss = { showAddCustomSession = false },
+            onSave = { name, shellPath ->
+                if (name.isNotBlank() && shellPath.isNotBlank()) {
+                    CustomSessions.add(name, shellPath)
+                    customSessions = CustomSessions.getAll()
+                }
+                showAddCustomSession = false
+            }
+        )
+    }
 }
 
 @Composable
@@ -173,6 +234,22 @@ private fun WorkingModeOption(title: String, description: String, mode: Int, cur
 
 @Composable
 private fun InputModeOption(title: String, description: String, mode: Int, currentMode: Int, onSelect: (Int) -> Unit) {
+    SettingsCard(
+        title = { Text(title) },
+        description = { Text(description) },
+        startWidget = {
+            RadioButton(
+                modifier = Modifier.padding(start = 8.dp),
+                selected = currentMode == mode,
+                onClick = { onSelect(mode) }
+            )
+        },
+        onClick = { onSelect(mode) }
+    )
+}
+
+@Composable
+private fun ExecModeOption(title: String, description: String, mode: ExecMode, currentMode: ExecMode?, onSelect: (ExecMode) -> Unit) {
     SettingsCard(
         title = { Text(title) },
         description = { Text(description) },

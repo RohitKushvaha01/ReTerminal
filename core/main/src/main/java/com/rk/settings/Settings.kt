@@ -51,6 +51,10 @@ object Settings {
         get() = Preference.getInt(key = "input_mode", default = InputMode.DEFAULT)
         set(value) = Preference.setInt(key = "input_mode", value)
 
+    var exec_mode
+        get() = Preference.getInt(key = "exec_mode", default = -1)
+        set(value) = Preference.setInt(key = "exec_mode", value)
+
     var custom_background_name
         get() = Preference.getString(key = "custom_bg_name", default = "No Image Selected")
         set(value) = Preference.setString(key = "custom_bg_name",value)
@@ -118,7 +122,6 @@ object Settings {
 object Preference {
     private var sharedPreferences: SharedPreferences = application!!.getSharedPreferences("Settings", Context.MODE_PRIVATE)
 
-    //store the result into memory for faster access
     private val stringCache = hashMapOf<String, String?>()
     private val boolCache = hashMapOf<String, Boolean>()
     private val intCache = hashMapOf<String, Int>()
@@ -182,8 +185,6 @@ object Preference {
             editor.apply()
         }.onFailure { it.printStackTrace() }
     }
-
-
 
     fun getString(key: String, default: String): String {
         runCatching {
