@@ -86,6 +86,8 @@ fun Settings(
     var selectedExecMode by remember { mutableStateOf(Rootfs.execMode.value) }
     var customSessions by remember { mutableStateOf(CustomSessions.getAll()) }
     var showAddCustomSession by remember { mutableStateOf(false) }
+    var defaultIsCustom by remember { mutableStateOf(Settings.default_is_custom) }
+    var defaultCustomId by remember { mutableStateOf(CustomSessions.getDefaultId()) }
 
     PreferenceLayout(
         label = stringResource(strings.settings),
@@ -93,13 +95,37 @@ fun Settings(
         onBack = { navController.popBackStack() }
     ) {
         PreferenceGroup(heading = stringResource(strings.default_working_mode)) {
-            WorkingModeOption("Alpine", stringResource(strings.alpine_desc), WorkingMode.ALPINE, selectedWorkingMode) {
-                selectedWorkingMode = it
-                Settings.working_Mode = it
+            WorkingModeOption(
+                title = "Alpine",
+                description = stringResource(strings.alpine_desc),
+                selected = !defaultIsCustom && selectedWorkingMode == WorkingMode.ALPINE
+            ) {
+                defaultIsCustom = false
+                Settings.default_is_custom = false
+                selectedWorkingMode = WorkingMode.ALPINE
+                Settings.working_Mode = WorkingMode.ALPINE
             }
-            WorkingModeOption("Android", stringResource(strings.android_desc), WorkingMode.ANDROID, selectedWorkingMode) {
-                selectedWorkingMode = it
-                Settings.working_Mode = it
+            WorkingModeOption(
+                title = "Android",
+                description = stringResource(strings.android_desc),
+                selected = !defaultIsCustom && selectedWorkingMode == WorkingMode.ANDROID
+            ) {
+                defaultIsCustom = false
+                Settings.default_is_custom = false
+                selectedWorkingMode = WorkingMode.ANDROID
+                Settings.working_Mode = WorkingMode.ANDROID
+            }
+            customSessions.forEach { session ->
+                WorkingModeOption(
+                    title = session.name,
+                    description = session.shellPath,
+                    selected = defaultIsCustom && defaultCustomId == session.id
+                ) {
+                    defaultIsCustom = true
+                    defaultCustomId = session.id
+                    Settings.default_is_custom = true
+                    CustomSessions.setDefault(session.id)
+                }
             }
         }
 
@@ -139,6 +165,8 @@ fun Settings(
                         IconButton(onClick = {
                             CustomSessions.remove(session.id)
                             customSessions = CustomSessions.getAll()
+                            defaultCustomId = CustomSessions.getDefaultId()
+                            defaultIsCustom = Settings.default_is_custom
                         }) {
                             Icon(imageVector = Icons.Outlined.Delete, contentDescription = null)
                         }
@@ -217,18 +245,18 @@ fun Settings(
 }
 
 @Composable
-private fun WorkingModeOption(title: String, description: String, mode: Int, currentMode: Int, onSelect: (Int) -> Unit) {
+private fun WorkingModeOption(title: String, description: String, selected: Boolean, onSelect: () -> Unit) {
     SettingsCard(
         title = { Text(title) },
         description = { Text(description) },
         startWidget = {
             RadioButton(
                 modifier = Modifier.padding(start = 8.dp),
-                selected = currentMode == mode,
-                onClick = { onSelect(mode) }
+                selected = selected,
+                onClick = onSelect
             )
         },
-        onClick = { onSelect(mode) }
+        onClick = onSelect
     )
 }
 

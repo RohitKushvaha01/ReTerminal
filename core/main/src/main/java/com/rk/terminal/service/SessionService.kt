@@ -17,6 +17,7 @@ import androidx.core.app.NotificationCompat
 import com.rk.resources.drawables
 import com.rk.resources.strings
 import com.rk.terminal.ui.activities.terminal.MainActivity
+import com.rk.terminal.ui.screens.terminal.CustomSessions
 import com.rk.terminal.ui.screens.terminal.MkSession
 import com.rk.terminal.ui.screens.terminal.PendingCommand
 import com.termux.terminal.TerminalSession
@@ -25,7 +26,10 @@ import com.termux.terminal.TerminalSessionClient
 class SessionService : Service() {
     private val sessions = hashMapOf<String, TerminalSession>()
     val sessionList = mutableStateMapOf<String, Int>()
-    var currentSession = mutableStateOf(Pair("main", com.rk.settings.Settings.working_Mode))
+
+    private val initialMode = CustomSessions.resolveDefaultSession()
+    var currentSession = mutableStateOf(Pair("main", initialMode.first))
+    var currentCustomSession = initialMode.second
 
     inner class SessionBinder : Binder() {
         fun getService(): SessionService = this@SessionService

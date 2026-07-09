@@ -56,6 +56,14 @@ object MkSession {
                 }
             }
 
+            val cleanupFile: File = localBinDir().child("cleanup-stale-mounts.sh")
+            if (cleanupFile.exists().not()) {
+                cleanupFile.createFileIfNot()
+                assets.open("cleanup-stale-mounts.sh").bufferedReader().use { it.readText() }.let {
+                    cleanupFile.writeText(it)
+                }
+            }
+
             localBinDir().child("init").apply {
                 if (exists().not()) {
                     createFileIfNot()

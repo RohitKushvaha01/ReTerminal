@@ -1,6 +1,8 @@
 package com.rk.terminal.ui.screens.terminal
 
 import com.rk.settings.Preference
+import com.rk.settings.Settings
+import com.rk.terminal.ui.screens.settings.WorkingMode
 import org.json.JSONArray
 import org.json.JSONObject
 
@@ -12,6 +14,7 @@ data class CustomSession(
 
 object CustomSessions {
     private const val KEY = "custom_sessions"
+    private const val DEFAULT_ID_KEY = "default_custom_session_id"
 
     fun getAll(): List<CustomSession> {
         val raw = Preference.getString(key = KEY, default = "[]")
@@ -39,6 +42,39 @@ object CustomSessions {
     fun remove(id: String) {
         val list = getAll().filterNot { it.id == id }
         save(list)
+        if (getDefaultId() == id) {
+            clearDefault()
+        }
+    }
+
+    fun getById(id: String): CustomSession? = getAll().firstOrNull { it.id == id }
+
+    fun getDefaultId(): String? {
+        val id = Preference.getString(key = DEFAULT_ID_KEY, default = "")
+        return id.ifBlank { null }
+    }
+
+    fun setDefault(id: String) {
+        Preference.setString(key = DEFAULT_ID_KEY, value = id)
+    }
+
+    fun clearDefault() {
+        Preference.setString(key = DEFAULT_ID_KEY, value = "")
+    }
+
+    fun resolveDefaultSession(): Pair<Int, CustomSession?> {
+        return if (Settings.default_is_custom) {
+            val id = getDefaultId()
+            val session = id?.let { getById(it) }
+            if (session != null) {
+                WorkingMode.ALPINE to session
+            } else {
+                Settings.default_is_custom = false
+                Settings.working_Mode to null
+            }
+        } else {
+            Settings.working_Mode to null
+        }
     }
 
     private fun save(list: List<CustomSession>) {
