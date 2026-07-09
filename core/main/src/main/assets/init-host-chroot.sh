@@ -1,18 +1,15 @@
 #!/bin/sh
 SU="/system/bin/su"
-
 ALPINE_DIR=$PREFIX/local/alpine
-mkdir -p $ALPINE_DIR
 
-if [ -f "$PREFIX/local/bin/cleanup-stale-mounts.sh" ]; then
-    $SU -c "sh $PREFIX/local/bin/cleanup-stale-mounts.sh"
-fi
+mkdir -p $ALPINE_DIR
 
 if [ -z "$(ls -A "$ALPINE_DIR" | grep -vE '^(root|tmp)$')" ]; then
     tar -xf "$PREFIX/files/alpine.tar.gz" -C "$ALPINE_DIR"
 fi
 
 MOUNTS=""
+
 mnt_bind() {
     src="$1"
     dst="$ALPINE_DIR${2:-$1}"
@@ -25,8 +22,8 @@ mnt_bind() {
         fi
     fi
     if [ -e "$src" ]; then
-        $SU -c "mount --bind '$src' '$dst'" 2>/dev/null && MOUNTS="$dst
-$MOUNTS"
+        $SU -c "mount --bind '$src' '$dst'" 2>/dev/null
+        MOUNTS="$MOUNTS $dst"
     fi
 }
 
@@ -67,13 +64,10 @@ if [ -e "$PREFIX/local/vmstat" ]; then
     $SU -c "cp '$PREFIX/local/vmstat' '$ALPINE_DIR/proc/vmstat'" 2>/dev/null
 fi
 
-echo "$MOUNTS" > "$PREFIX/local/.chroot_mounts"
-
 cleanup() {
-    while IFS= read -r m; do
-        [ -n "$m" ] && $SU -c "umount -l '$m'" 2>/dev/null
-    done < "$PREFIX/local/.chroot_mounts"
-    rm -f "$PREFIX/local/.chroot_mounts"
+    for m in $MOUNTS; do
+        $SU -c "umount -l '$m'" 2>/dev/null
+    done
 }
 trap cleanup EXIT INT TERM
 
