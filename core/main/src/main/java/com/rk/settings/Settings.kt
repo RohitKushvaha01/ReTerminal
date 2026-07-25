@@ -40,7 +40,7 @@ object Settings {
         set(value) = Preference.setInt(key = "terminal_font_size",value)
 
     var wallTransparency
-        get() = Preference.getFloat(key = "wallTransparency", default = 0f)
+        get() = Preference.getFloat(key = "wallTransparency", default = 1f)
         set(value) = Preference.setFloat(key = "wallTransparency",value)
 
     var working_Mode

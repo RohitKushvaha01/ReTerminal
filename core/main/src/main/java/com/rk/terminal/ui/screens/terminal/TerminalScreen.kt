@@ -57,19 +57,22 @@ fun TerminalScreen(
     var showAddDialog by remember { mutableStateOf(false) }
 
     val sessionBinder = mainViewModel.sessionBinder
-
+    
     LaunchedEffect(Unit) {
         withContext(Dispatchers.IO) {
             if (context.filesDir.child("background").exists().not()) {
                 TerminalUtils.darkText.value = !isDarkMode
-            } else if (terminalViewModel.bitmap == null) {
-                BitmapFactory.decodeFile(context.filesDir.child("background").absolutePath)?.asImageBitmap()?.let {
-                    terminalViewModel.bitmap = it
+                TerminalUtils.hasCustomBackground.value = false
+            } else {
+                TerminalUtils.hasCustomBackground.value = true
+                if (terminalViewModel.bitmap == null) {
+                    BitmapFactory.decodeFile(context.filesDir.child("background").absolutePath)?.asImageBitmap()?.let {
+                        terminalViewModel.bitmap = it
+                    }
                 }
             }
         }
     }
-
     terminalViewModel.virtualKeysView?.apply {
         virtualKeysViewClient = terminalViewModel.terminalView?.mTermSession?.let { VirtualKeysListener(it) }
         buttonTextColor = TerminalUtils.getViewColor()
