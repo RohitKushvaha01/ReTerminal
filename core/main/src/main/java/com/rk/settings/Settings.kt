@@ -102,6 +102,15 @@ object Settings {
         get() = Preference.getBoolean(key = "shortcuts_enabled", default = true)
         set(value) = Preference.setBoolean(key = "shortcuts_enabled", value)
 
+    const val default_virtual_keys = "[" +
+        "\n  [\"ESC\", {\"key\": \"/\", \"popup\": \"\\\\\"}, {\"key\": \"-\", \"popup\": \"|\"}, \"HOME\", \"UP\", \"END\", \"PGUP\"]," +
+        "\n  [\"TAB\", \"CTRL\", \"ALT\", \"LEFT\", \"DOWN\", \"RIGHT\", \"PGDN\"]" +
+        "\n]"
+
+    var virtual_keys_string: String
+        get() = Preference.getString(key = "virtual_keys_string", default = default_virtual_keys)
+        set(value) = Preference.setString(key = "virtual_keys_string", value)
+
     fun getShortcutBinding(action: com.rk.terminal.ui.screens.terminal.ShortcutAction): com.rk.terminal.ui.screens.terminal.ShortcutBinding {
         val raw = Preference.getString(key = action.prefKey, default = action.default.serialize())
         return com.rk.terminal.ui.screens.terminal.ShortcutBinding.deserialize(raw)

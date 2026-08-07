@@ -116,7 +116,7 @@ private fun VirtualKeysPager(viewModel: TerminalViewModel) {
                                 VirtualKeysListener(it)
                             }
                             buttonTextColor = onSurfaceColor
-                            reload(VirtualKeysInfo(VIRTUAL_KEYS, "", VirtualKeysConstants.CONTROL_CHARS_ALIASES))
+                            reload(VirtualKeysInfo(Settings.virtual_keys_string, "", VirtualKeysConstants.CONTROL_CHARS_ALIASES))
                         }
                     },
                     modifier = Modifier.fillMaxWidth().height(75.dp)

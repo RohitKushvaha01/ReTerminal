@@ -46,7 +46,10 @@ class MainActivity : ComponentActivity() {
         }
 
         setContent {
-            KarbonTheme {
+            KarbonTheme(
+                highContrastDarkTheme = viewModel.isAmoled,
+                dynamicColor = viewModel.isMonet
+            ) {
                 Surface {
                     val navController = rememberNavController()
                     if (viewModel.isBound) {

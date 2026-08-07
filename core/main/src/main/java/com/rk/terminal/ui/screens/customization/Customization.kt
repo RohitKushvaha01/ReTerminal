@@ -35,6 +35,9 @@ import com.rk.settings.Settings
 import com.rk.terminal.ui.activities.terminal.MainViewModel
 import com.rk.terminal.ui.components.SettingsToggle
 import com.rk.terminal.ui.screens.terminal.*
+import com.rk.terminal.ui.screens.terminal.virtualkeys.VirtualKeysInfo
+import com.rk.terminal.ui.screens.terminal.virtualkeys.VirtualKeysConstants
+import org.json.JSONArray
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -120,6 +123,30 @@ fun Customization(
             SettingsToggle(label = stringResource(strings.vibrate), description = stringResource(strings.vibrate_desc), showSwitch = true, default = Settings.vibrate, sideEffect = { Settings.vibrate = it })
         }
 
+        PreferenceGroup(heading = "App Theme") {
+            SettingsToggle(
+                label = stringResource(strings.amoled),
+                description = stringResource(strings.amoled_desc),
+                showSwitch = true,
+                default = mainViewModel.isAmoled,
+                sideEffect = {
+                    Settings.amoled = it
+                    mainViewModel.isAmoled = it
+                }
+            )
+
+            SettingsToggle(
+                label = stringResource(strings.monet),
+                description = stringResource(strings.monet_desc),
+                showSwitch = true,
+                default = mainViewModel.isMonet,
+                sideEffect = {
+                    Settings.monet = it
+                    mainViewModel.isMonet = it
+                }
+            )
+        }
+
         PreferenceGroup {
             SettingsToggle(
                 label = stringResource(strings.statusbar),
@@ -166,6 +193,35 @@ fun Customization(
                     Settings.virtualKeys = it
                     terminalViewModel.showVirtualKeys = it
                 }
+            )
+
+            var showVirtualKeysEdit by remember { mutableStateOf(false) }
+
+            if (showVirtualKeysEdit) {
+                VirtualKeysEditDialog(
+                    currentKeys = Settings.virtual_keys_string,
+                    onDismiss = { showVirtualKeysEdit = false },
+                    onConfirm = { newKeys ->
+                        Settings.virtual_keys_string = newKeys
+                        terminalViewModel.virtualKeysView?.reload(
+                            VirtualKeysInfo(
+                                newKeys,
+                                "",
+                                VirtualKeysConstants.CONTROL_CHARS_ALIASES
+                            )
+                        )
+                        showVirtualKeysEdit = false
+                    }
+                )
+            }
+
+            SettingsToggle(
+                isEnabled = terminalViewModel.showVirtualKeys,
+                label = stringResource(strings.edit_virtual_keys),
+                description = stringResource(strings.edit_virtual_keys_desc),
+                showSwitch = false,
+                default = false,
+                sideEffect = { showVirtualKeysEdit = true }
             )
 
             SettingsToggle(
@@ -378,5 +434,87 @@ private fun ShortcutSection() {
                 }
             )
         }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun VirtualKeysEditDialog(
+    currentKeys: String,
+    onDismiss: () -> Unit,
+    onConfirm: (String) -> Unit
+) {
+    var text by remember { mutableStateOf(currentKeys) }
+    var isError by remember { mutableStateOf(false) }
+
+    BasicAlertDialog(onDismissRequest = onDismiss) {
+        Surface(
+            shape = MaterialTheme.shapes.extraLarge,
+            tonalElevation = AlertDialogDefaults.TonalElevation
+        ) {
+            Column(
+                modifier = Modifier
+                    .padding(24.dp)
+                    .fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                Text(
+                    text = stringResource(strings.edit_virtual_keys),
+                    style = MaterialTheme.typography.headlineSmall
+                )
+                
+                OutlinedTextField(
+                    value = text,
+                    onValueChange = {
+                        text = it
+                        isError = false
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .heightIn(min = 120.dp, max = 300.dp),
+                    label = { Text("Layout JSON") },
+                    isError = isError,
+                    supportingText = {
+                        if (isError) {
+                            Text(
+                                text = stringResource(strings.invalid_json),
+                                color = MaterialTheme.colorScheme.error
+                            )
+                        }
+                    }
+                )
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.End,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    TextButton(onClick = onDismiss) {
+                        Text(stringResource(strings.cancel))
+                    }
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Button(
+                        onClick = {
+                            if (isValidJsonArray(text)) {
+                                onConfirm(text)
+                            } else {
+                                isError = true
+                            }
+                        }
+                    ) {
+                        Text(stringResource(strings.apply))
+                    }
+                }
+            }
+        }
+    }
+}
+
+private fun isValidJsonArray(json: String): Boolean {
+    return try {
+        org.json.JSONArray(json)
+        true
+    } catch (e: Exception) {
+        false
     }
 }
