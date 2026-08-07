@@ -27,20 +27,46 @@ android {
             }
             
             val propertiesFile = File(propertiesFilePath)
-            if (propertiesFile.exists()) {
-                val properties = Properties()
-                properties.load(propertiesFile.inputStream())
-                keyAlias = properties["keyAlias"] as String?
-                keyPassword = properties["keyPassword"] as String?
-                storeFile = if (isGITHUB_ACTION) {
-                    File("/tmp/xed.keystore")
-                } else {
-                    (properties["storeFile"] as String?)?.let { File(it) }
+            if (propertiesFile.exists() && propertiesFile.length() > 0) {
+                runCatching {
+                    val properties = Properties()
+                    properties.load(propertiesFile.inputStream())
+                    val alias = properties["keyAlias"] as String?
+                    val keyPass = properties["keyPassword"] as String?
+                    val storePass = properties["storePassword"] as String?
+                    
+                    if (!alias.isNullOrBlank() && !keyPass.isNullOrBlank() && !storePass.isNullOrBlank()) {
+                        keyAlias = alias
+                        keyPassword = keyPass
+                        storeFile = if (isGITHUB_ACTION) {
+                            File("/tmp/xed.keystore")
+                        } else {
+                            (properties["storeFile"] as String?)?.let { File(it) }
+                        }
+                        storePassword = storePass
+                    } else {
+                        // Fallback to testkey
+                        storeFile = file(layout.buildDirectory.dir("../testkey.keystore"))
+                        storePassword = "testkey"
+                        keyAlias = "testkey"
+                        keyPassword = "testkey"
+                        println("Signing properties are missing required fields. Using testkey fallback.")
+                    }
+                }.onFailure {
+                    // Fallback to testkey
+                    storeFile = file(layout.buildDirectory.dir("../testkey.keystore"))
+                    storePassword = "testkey"
+                    keyAlias = "testkey"
+                    keyPassword = "testkey"
+                    println("Failed to load signing properties. Using testkey fallback.")
                 }
-                
-                storePassword = properties["storePassword"] as String?
             } else {
-                println("Signing properties file not found at $propertiesFilePath")
+                // Fallback to testkey
+                storeFile = file(layout.buildDirectory.dir("../testkey.keystore"))
+                storePassword = "testkey"
+                keyAlias = "testkey"
+                keyPassword = "testkey"
+                println("Signing properties file not found or empty. Using testkey fallback.")
             }
         }
         getByName("debug") {
