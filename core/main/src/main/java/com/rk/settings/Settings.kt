@@ -40,7 +40,7 @@ object Settings {
         set(value) = Preference.setInt(key = "terminal_font_size",value)
 
     var wallTransparency
-        get() = Preference.getFloat(key = "wallTransparency", default = 0f)
+        get() = Preference.getFloat(key = "wallTransparency", default = 1f)
         set(value) = Preference.setFloat(key = "wallTransparency",value)
 
     var working_Mode
@@ -50,6 +50,14 @@ object Settings {
     var input_mode
         get() = Preference.getInt(key = "input_mode", default = InputMode.DEFAULT)
         set(value) = Preference.setInt(key = "input_mode", value)
+
+    var exec_mode
+        get() = Preference.getInt(key = "exec_mode", default = -1)
+        set(value) = Preference.setInt(key = "exec_mode", value)
+
+    var default_is_custom
+        get() = Preference.getBoolean(key = "default_is_custom", default = false)
+        set(value) = Preference.setBoolean(key = "default_is_custom", value)
 
     var custom_background_name
         get() = Preference.getString(key = "custom_bg_name", default = "No Image Selected")
@@ -118,7 +126,6 @@ object Settings {
 object Preference {
     private var sharedPreferences: SharedPreferences = application!!.getSharedPreferences("Settings", Context.MODE_PRIVATE)
 
-    //store the result into memory for faster access
     private val stringCache = hashMapOf<String, String?>()
     private val boolCache = hashMapOf<String, Boolean>()
     private val intCache = hashMapOf<String, Int>()
@@ -182,8 +189,6 @@ object Preference {
             editor.apply()
         }.onFailure { it.printStackTrace() }
     }
-
-
 
     fun getString(key: String, default: String): String {
         runCatching {

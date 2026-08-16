@@ -10,17 +10,22 @@ import com.rk.settings.Settings
 object TerminalUtils {
     var darkText = mutableStateOf(Settings.blackTextColor)
     var typeface: Typeface = Typeface.MONOSPACE
+    var hasCustomBackground = mutableStateOf(false)
 
     fun init(context: Context) {
         val fontFile = context.filesDir.child("font.ttf")
         if (fontFile.exists() && fontFile.canRead()) {
             typeface = Typeface.createFromFile(fontFile)
         }
+        hasCustomBackground.value = context.filesDir.child("background").exists()
     }
 
     fun getViewColor(): Int = if (darkText.value) Color.BLACK else Color.WHITE
 
     fun getBackgroundColor(): Int {
+        if (hasCustomBackground.value) {
+            return Color.TRANSPARENT
+        }
         val baseColor = if (darkText.value) Color.WHITE else Color.BLACK
         return androidx.core.graphics.ColorUtils.setAlphaComponent(baseColor, (255 * 0.3f).toInt())
     }
