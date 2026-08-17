@@ -23,6 +23,14 @@ object Settings {
             default = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
         )
         set(value) = Preference.setBoolean(key = "monet",value)
+
+    var selected_palette: String
+        get() = Preference.getString(key = "selected_palette", default = "CATPPUCCIN")
+        set(value) = Preference.setString(key = "selected_palette", value)
+
+    var theme_palette: com.rk.terminal.ui.theme.ThemePalette
+        get() = com.rk.terminal.ui.theme.ThemePalette.fromName(selected_palette)
+        set(value) { selected_palette = value.name }
     var ignore_storage_permission
         get() = Preference.getBoolean(key = "ignore_storage_permission",default = false)
         set(value) = Preference.setBoolean(key = "ignore_storage_permission",value)

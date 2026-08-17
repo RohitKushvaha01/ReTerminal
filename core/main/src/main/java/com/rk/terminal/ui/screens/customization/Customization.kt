@@ -174,6 +174,17 @@ fun Customization(
                     mainViewModel.isMonet = it
                 }
             )
+
+            if (!mainViewModel.isMonet) {
+                com.rk.terminal.ui.components.AccentColorPicker(
+                    selectedPalette = mainViewModel.themePalette,
+                    isDarkTheme = isDarkActive,
+                    onPaletteSelected = {
+                        Settings.theme_palette = it
+                        mainViewModel.themePalette = it
+                    }
+                )
+            }
         }
 
         PreferenceGroup {

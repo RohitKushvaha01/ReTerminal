@@ -53,7 +53,8 @@ class MainActivity : ComponentActivity() {
             KarbonTheme(
                 darkTheme = isDarkThemeActive,
                 highContrastDarkTheme = viewModel.isAmoled,
-                dynamicColor = viewModel.isMonet
+                dynamicColor = viewModel.isMonet,
+                themePalette = viewModel.themePalette
             ) {
                 Surface(
                     color = MaterialTheme.colorScheme.background

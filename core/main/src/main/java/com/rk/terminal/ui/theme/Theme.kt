@@ -117,6 +117,7 @@ fun KarbonTheme(
     },
     highContrastDarkTheme: Boolean = Settings.amoled,
     dynamicColor: Boolean = Settings.monet,
+    themePalette: ThemePalette = Settings.theme_palette,
     content: @Composable () -> Unit,
 ) {
     val colorScheme =
@@ -132,9 +133,9 @@ fun KarbonTheme(
             }
 
             darkTheme && highContrastDarkTheme ->
-                DarkColorScheme.toAmoled()
-            darkTheme -> DarkColorScheme
-            else -> LightColorScheme
+                darkColorSchemeFor(themePalette).toAmoled()
+            darkTheme -> darkColorSchemeFor(themePalette)
+            else -> lightColorSchemeFor(themePalette)
         }
     val view = LocalView.current
     if (!view.isInEditMode) {

@@ -78,4 +78,15 @@
     <string name="edit_virtual_keys">Edit Virtual Keys</string>
     <string name="edit_virtual_keys_desc">Customize the layout of virtual keys bar (JSON format)</string>
     <string name="invalid_json">Invalid JSON format</string>
+    <string name="accent_color">Accent Color</string>
+    <string name="rename_session">Rename Session</string>
+    <string name="rename">Rename</string>
+    <string name="session_name">Session Name</string>
+    <string name="sort_sessions">Sort Sessions</string>
+    <string name="sort_az">Sort A to Z</string>
+    <string name="sort_za">Sort Z to A</string>
+    <string name="move_up">Move Up</string>
+    <string name="move_down">Move Down</string>
+    <string name="name_already_exists">A session with this name already exists</string>
+    <string name="name_cannot_be_empty">Name cannot be empty</string>
 </resources>

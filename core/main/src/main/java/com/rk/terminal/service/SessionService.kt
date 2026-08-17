@@ -11,6 +11,7 @@ import android.os.Binder
 import android.os.Build
 import android.os.IBinder
 import androidx.annotation.RequiresApi
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.core.app.NotificationCompat
@@ -24,6 +25,7 @@ import com.termux.terminal.TerminalSessionClient
 class SessionService : Service() {
     private val sessions = hashMapOf<String, TerminalSession>()
     val sessionList = mutableStateMapOf<String, Int>()
+    val sessionOrder = mutableStateListOf<String>()
     var currentSession = mutableStateOf(Pair("main", com.rk.settings.Settings.working_Mode))
 
     inner class SessionBinder : Binder() {
@@ -33,6 +35,7 @@ class SessionService : Service() {
             sessions.values.forEach { it.finishIfRunning() }
             sessions.clear()
             sessionList.clear()
+            sessionOrder.clear()
             updateNotification()
         }
 
@@ -49,11 +52,51 @@ class SessionService : Service() {
             ).also {
                 sessions[id] = it
                 sessionList[id] = workingMode
+                if (!sessionOrder.contains(id)) {
+                    sessionOrder.add(id)
+                }
                 updateNotification()
             }
         }
 
         fun getSession(id: String): TerminalSession? = sessions[id]
+
+        fun renameSession(oldId: String, newId: String): Boolean {
+            val trimmed = newId.trim()
+            if (trimmed.isEmpty()) return false
+            if (trimmed == oldId) return true
+            if (sessions.containsKey(trimmed)) return false
+
+            val session = sessions.remove(oldId) ?: return false
+            val mode = sessionList.remove(oldId) ?: com.rk.settings.Settings.working_Mode
+            sessions[trimmed] = session
+            sessionList[trimmed] = mode
+
+            val idx = sessionOrder.indexOf(oldId)
+            if (idx != -1) {
+                sessionOrder[idx] = trimmed
+            } else {
+                sessionOrder.add(trimmed)
+            }
+
+            if (currentSession.value.first == oldId) {
+                currentSession.value = Pair(trimmed, mode)
+            }
+            return true
+        }
+
+        fun moveSession(fromIndex: Int, toIndex: Int) {
+            if (fromIndex in sessionOrder.indices && toIndex in sessionOrder.indices && fromIndex != toIndex) {
+                val item = sessionOrder.removeAt(fromIndex)
+                sessionOrder.add(toIndex, item)
+            }
+        }
+
+        fun sortSessions(ascending: Boolean = true) {
+            val sorted = if (ascending) sessionOrder.sorted() else sessionOrder.sortedDescending()
+            sessionOrder.clear()
+            sessionOrder.addAll(sorted)
+        }
 
         fun terminateSession(id: String) {
             sessions[id]?.apply {
@@ -63,6 +106,7 @@ class SessionService : Service() {
             }
             sessions.remove(id)
             sessionList.remove(id)
+            sessionOrder.remove(id)
             if (sessions.isEmpty()) {
                 stopSelf()
             } else {
