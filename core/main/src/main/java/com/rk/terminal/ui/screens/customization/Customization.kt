@@ -33,6 +33,7 @@ import com.rk.libcommons.*
 import com.rk.resources.strings
 import com.rk.settings.Settings
 import com.rk.terminal.ui.activities.terminal.MainViewModel
+import com.rk.terminal.ui.components.AccentColorPicker
 import com.rk.terminal.ui.components.SettingsToggle
 import com.rk.terminal.ui.screens.terminal.*
 import com.rk.terminal.ui.screens.terminal.virtualkeys.VirtualKeysInfo
@@ -176,7 +177,7 @@ fun Customization(
             )
 
             if (!mainViewModel.isMonet) {
-                com.rk.terminal.ui.components.AccentColorPicker(
+                AccentColorPicker(
                     selectedPalette = mainViewModel.themePalette,
                     isDarkTheme = isDarkActive,
                     onPaletteSelected = {

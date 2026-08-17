@@ -43,7 +43,7 @@ fun <T> RadioBottomSheet(
                     items(options) { item ->
                         PreferenceTemplate(
                             title = { Text(text = item.label) },
-                            description = {Text(text = item.label)},
+                            description = { item.description?.let { Text(text = it) } },
                             modifier = Modifier.clickable { onOptionSelected(item)},
                             startWidget = { RadioButton(selected = item == selectedOption, onClick = null) }
                         )

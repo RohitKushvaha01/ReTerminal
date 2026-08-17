@@ -81,6 +81,7 @@ dependencies {
     implementation(libs.utilcode)
     implementation(libs.anrwatchdog)
     implementation(libs.androidx.compose.material.icons.core)
+    implementation(libs.androidx.compose.material.icons.extended)
     implementation(libs.androidx.palette)
 
     implementation(project(":core:resources"))

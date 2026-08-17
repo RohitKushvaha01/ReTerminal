@@ -35,7 +35,7 @@ fun SettingsToggle(
     isSwitchLocked: Boolean = false,
     endWidget: (@Composable () -> Unit)? = null,
 ) {
-    var state by remember {
+    var state by remember(default) {
         mutableStateOf(default)
     }
 
