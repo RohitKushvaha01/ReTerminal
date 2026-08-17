@@ -96,6 +96,18 @@ private val DarkColorScheme =
     )
 
 
+private fun ColorScheme.toAmoled(): ColorScheme = copy(
+    background = Color.Black,
+    surface = Color.Black,
+    surfaceDim = Color.Black,
+    surfaceBright = Color.Black,
+    surfaceContainerLowest = Color.Black,
+    surfaceContainerLow = Color.Black,
+    surfaceContainer = Color.Black,
+    surfaceContainerHigh = Color.Black,
+    surfaceContainerHighest = Color.Black,
+)
+
 @Composable
 fun KarbonTheme(
     darkTheme: Boolean = when (Settings.default_night_mode) {
@@ -113,15 +125,14 @@ fun KarbonTheme(
                 val context = LocalContext.current
                 when {
                     darkTheme && highContrastDarkTheme ->
-                        dynamicDarkColorScheme(context)
-                            .copy(background = Color.Black, surface = Color.Black)
+                        dynamicDarkColorScheme(context).toAmoled()
                     darkTheme -> dynamicDarkColorScheme(context)
                     else -> dynamicLightColorScheme(context)
                 }
             }
 
             darkTheme && highContrastDarkTheme ->
-                DarkColorScheme.copy(background = Color.Black, surface = Color.Black)
+                DarkColorScheme.toAmoled()
             darkTheme -> DarkColorScheme
             else -> LightColorScheme
         }

@@ -28,7 +28,10 @@ fun TerminalDrawer(
     onAddSession: () -> Unit,
     onSessionSelected: (String) -> Unit
 ) {
-    ModalDrawerSheet(modifier = Modifier.width(drawerWidth)) {
+    ModalDrawerSheet(
+        modifier = Modifier.width(drawerWidth),
+        drawerContainerColor = MaterialTheme.colorScheme.background
+    ) {
         Column(
             modifier = Modifier.fillMaxSize(),
             verticalArrangement = Arrangement.spacedBy(8.dp)

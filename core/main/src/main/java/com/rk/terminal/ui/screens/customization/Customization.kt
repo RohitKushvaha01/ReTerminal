@@ -123,17 +123,46 @@ fun Customization(
             SettingsToggle(label = stringResource(strings.vibrate), description = stringResource(strings.vibrate_desc), showSwitch = true, default = Settings.vibrate, sideEffect = { Settings.vibrate = it })
         }
 
-        PreferenceGroup(heading = "App Theme") {
+        PreferenceGroup(heading = stringResource(strings.app_theme)) {
             SettingsToggle(
-                label = stringResource(strings.amoled),
-                description = stringResource(strings.amoled_desc),
+                label = stringResource(strings.follow_system_theme),
+                description = stringResource(strings.follow_system_theme_desc),
                 showSwitch = true,
-                default = mainViewModel.isAmoled,
+                default = mainViewModel.followSystemTheme,
                 sideEffect = {
-                    Settings.amoled = it
-                    mainViewModel.isAmoled = it
+                    Settings.follow_system_theme = it
+                    mainViewModel.followSystemTheme = it
                 }
             )
+
+            if (!mainViewModel.followSystemTheme) {
+                SettingsToggle(
+                    label = stringResource(strings.dark_mode),
+                    description = stringResource(strings.dark_mode_desc),
+                    showSwitch = true,
+                    default = mainViewModel.isDarkMode,
+                    sideEffect = {
+                        Settings.dark_mode = it
+                        mainViewModel.isDarkMode = it
+                    }
+                )
+            }
+
+            val isSystemDark = isSystemInDarkTheme()
+            val isDarkActive = if (mainViewModel.followSystemTheme) isSystemDark else mainViewModel.isDarkMode
+
+            if (isDarkActive) {
+                SettingsToggle(
+                    label = stringResource(strings.amoled),
+                    description = stringResource(strings.amoled_desc),
+                    showSwitch = true,
+                    default = mainViewModel.isAmoled,
+                    sideEffect = {
+                        Settings.amoled = it
+                        mainViewModel.isAmoled = it
+                    }
+                )
+            }
 
             SettingsToggle(
                 label = stringResource(strings.monet),

@@ -11,6 +11,8 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
+import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.*
 import androidx.compose.ui.platform.LocalFocusManager
@@ -46,11 +48,16 @@ class MainActivity : ComponentActivity() {
         }
 
         setContent {
+            val systemDark = isSystemInDarkTheme()
+            val isDarkThemeActive = if (viewModel.followSystemTheme) systemDark else viewModel.isDarkMode
             KarbonTheme(
+                darkTheme = isDarkThemeActive,
                 highContrastDarkTheme = viewModel.isAmoled,
                 dynamicColor = viewModel.isMonet
             ) {
-                Surface {
+                Surface(
+                    color = MaterialTheme.colorScheme.background
+                ) {
                     val navController = rememberNavController()
                     if (viewModel.isBound) {
                         MainActivityNavHost(

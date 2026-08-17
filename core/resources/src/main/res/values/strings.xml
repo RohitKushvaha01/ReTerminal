@@ -66,6 +66,11 @@
     <string name="input_mode_type_null_desc">Semantically correct but may break some IMEs</string>
     <string name="input_mode_visible_password">Legacy Workaround</string>
     <string name="input_mode_visible_password_desc">Fixes Samsung keyboard echo; may break Gboard CJK input</string>
+    <string name="app_theme">App Theme</string>
+    <string name="follow_system_theme">Follow system theme</string>
+    <string name="follow_system_theme_desc">Match system theme settings</string>
+    <string name="dark_mode">Dark mode</string>
+    <string name="dark_mode_desc">Turn on dark theme</string>
     <string name="amoled">AMOLED Black</string>
     <string name="amoled_desc">Use pure black background in dark mode</string>
     <string name="monet">Dynamic Colors (Monet)</string>
