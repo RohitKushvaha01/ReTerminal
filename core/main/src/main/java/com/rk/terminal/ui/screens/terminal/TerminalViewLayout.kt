@@ -40,16 +40,29 @@ fun TerminalViewLayout(
                     viewModel.setTerminalView(this)
                     setTextSize(dpToPx(Settings.terminal_font_size.toFloat(), ctx))
                     setBackgroundColor(android.graphics.Color.TRANSPARENT)
-                    
+
                     val client = TerminalBackEnd(this, mainActivity)
                     val service = sessionBinder.getService()
-                    
+
                     val session = sessionBinder.getSession(service.currentSession.value.first)
-                        ?: sessionBinder.createSession(
-                            service.currentSession.value.first,
-                            client,
-                            Settings.working_Mode
-                        )
+                        ?: run {
+                            val custom = service.currentCustomSession
+                            if (custom != null) {
+                                val pendingCommand = MkSession.buildCustomPendingCommand(ctx, custom)
+                                sessionBinder.createSession(
+                                    service.currentSession.value.first,
+                                    client,
+                                    service.currentSession.value.second,
+                                    pendingCommand
+                                )
+                            } else {
+                                sessionBinder.createSession(
+                                    service.currentSession.value.first,
+                                    client,
+                                    Settings.working_Mode
+                                )
+                            }
+                        }
 
                     session.updateTerminalSessionClient(client)
                     attachSession(session)

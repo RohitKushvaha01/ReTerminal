@@ -9,6 +9,8 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.KeyboardArrowRight
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -25,6 +27,9 @@ import com.rk.settings.Settings
 import com.rk.terminal.ui.activities.terminal.MainActivity
 import com.rk.terminal.ui.components.SettingsToggle
 import com.rk.terminal.ui.routes.MainActivityRoutes
+import com.rk.terminal.ui.screens.terminal.CustomSessions
+import com.rk.terminal.ui.screens.terminal.ExecMode
+import com.rk.terminal.ui.screens.terminal.Rootfs
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -78,6 +83,11 @@ fun Settings(
     val context = LocalContext.current
     var selectedWorkingMode by remember { mutableIntStateOf(Settings.working_Mode) }
     var selectedInputMode by remember { mutableIntStateOf(Settings.input_mode) }
+    var selectedExecMode by remember { mutableStateOf(Rootfs.execMode.value) }
+    var customSessions by remember { mutableStateOf(CustomSessions.getAll()) }
+    var showAddCustomSession by remember { mutableStateOf(false) }
+    var defaultIsCustom by remember { mutableStateOf(Settings.default_is_custom) }
+    var defaultCustomId by remember { mutableStateOf(CustomSessions.getDefaultId()) }
 
     PreferenceLayout(
         label = stringResource(strings.settings),
@@ -85,13 +95,48 @@ fun Settings(
         onBack = { navController.popBackStack() }
     ) {
         PreferenceGroup(heading = stringResource(strings.default_working_mode)) {
-            WorkingModeOption("Alpine", stringResource(strings.alpine_desc), WorkingMode.ALPINE, selectedWorkingMode) {
-                selectedWorkingMode = it
-                Settings.working_Mode = it
+            WorkingModeOption(
+                title = "Alpine",
+                description = stringResource(strings.alpine_desc),
+                selected = !defaultIsCustom && selectedWorkingMode == WorkingMode.ALPINE
+            ) {
+                defaultIsCustom = false
+                Settings.default_is_custom = false
+                selectedWorkingMode = WorkingMode.ALPINE
+                Settings.working_Mode = WorkingMode.ALPINE
             }
-            WorkingModeOption("Android", stringResource(strings.android_desc), WorkingMode.ANDROID, selectedWorkingMode) {
-                selectedWorkingMode = it
-                Settings.working_Mode = it
+            WorkingModeOption(
+                title = "Android",
+                description = stringResource(strings.android_desc),
+                selected = !defaultIsCustom && selectedWorkingMode == WorkingMode.ANDROID
+            ) {
+                defaultIsCustom = false
+                Settings.default_is_custom = false
+                selectedWorkingMode = WorkingMode.ANDROID
+                Settings.working_Mode = WorkingMode.ANDROID
+            }
+            customSessions.forEach { session ->
+                WorkingModeOption(
+                    title = session.name,
+                    description = session.shellPath,
+                    selected = defaultIsCustom && defaultCustomId == session.id
+                ) {
+                    defaultIsCustom = true
+                    defaultCustomId = session.id
+                    Settings.default_is_custom = true
+                    CustomSessions.setDefault(session.id)
+                }
+            }
+        }
+
+        PreferenceGroup(heading = "Execution Mode") {
+            ExecModeOption("Chroot", "Requires root, faster, real bind mounts", ExecMode.CHROOT, selectedExecMode) {
+                selectedExecMode = it
+                Rootfs.setExecMode(it)
+            }
+            ExecModeOption("Proot", "No root required, slightly slower", ExecMode.PROOT, selectedExecMode) {
+                selectedExecMode = it
+                Rootfs.setExecMode(it)
             }
         }
 
@@ -108,6 +153,37 @@ fun Settings(
                 selectedInputMode = it
                 Settings.input_mode = it
             }
+        }
+
+        PreferenceGroup(heading = "Custom Sessions") {
+            customSessions.forEach { session ->
+                SettingsCard(
+                    title = { Text(session.name) },
+                    description = { Text(session.shellPath) },
+                    onClick = {},
+                    endWidget = {
+                        IconButton(onClick = {
+                            CustomSessions.remove(session.id)
+                            customSessions = CustomSessions.getAll()
+                            defaultCustomId = CustomSessions.getDefaultId()
+                            defaultIsCustom = Settings.default_is_custom
+                        }) {
+                            Icon(imageVector = Icons.Outlined.Delete, contentDescription = null)
+                        }
+                    }
+                )
+            }
+            SettingsCard(
+                title = { Text("Add Custom Session") },
+                onClick = { showAddCustomSession = true },
+                endWidget = {
+                    Icon(
+                        imageVector = Icons.Default.Add,
+                        contentDescription = null,
+                        modifier = Modifier.padding(16.dp)
+                    )
+                }
+            )
         }
 
         PreferenceGroup {
@@ -153,10 +229,39 @@ fun Settings(
             )
         }
     }
+
+    if (showAddCustomSession) {
+        CustomSessionDialog(
+            onDismiss = { showAddCustomSession = false },
+            onSave = { name, shellPath ->
+                if (name.isNotBlank() && shellPath.isNotBlank()) {
+                    CustomSessions.add(name, shellPath)
+                    customSessions = CustomSessions.getAll()
+                }
+                showAddCustomSession = false
+            }
+        )
+    }
 }
 
 @Composable
-private fun WorkingModeOption(title: String, description: String, mode: Int, currentMode: Int, onSelect: (Int) -> Unit) {
+private fun WorkingModeOption(title: String, description: String, selected: Boolean, onSelect: () -> Unit) {
+    SettingsCard(
+        title = { Text(title) },
+        description = { Text(description) },
+        startWidget = {
+            RadioButton(
+                modifier = Modifier.padding(start = 8.dp),
+                selected = selected,
+                onClick = onSelect
+            )
+        },
+        onClick = onSelect
+    )
+}
+
+@Composable
+private fun InputModeOption(title: String, description: String, mode: Int, currentMode: Int, onSelect: (Int) -> Unit) {
     SettingsCard(
         title = { Text(title) },
         description = { Text(description) },
@@ -172,7 +277,7 @@ private fun WorkingModeOption(title: String, description: String, mode: Int, cur
 }
 
 @Composable
-private fun InputModeOption(title: String, description: String, mode: Int, currentMode: Int, onSelect: (Int) -> Unit) {
+private fun ExecModeOption(title: String, description: String, mode: ExecMode, currentMode: ExecMode?, onSelect: (ExecMode) -> Unit) {
     SettingsCard(
         title = { Text(title) },
         description = { Text(description) },

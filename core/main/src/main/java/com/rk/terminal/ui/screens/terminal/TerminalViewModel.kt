@@ -13,6 +13,7 @@ import com.google.android.material.R
 import com.rk.settings.Settings
 import com.rk.terminal.service.SessionService
 import com.rk.terminal.ui.activities.terminal.MainActivity
+import com.rk.terminal.ui.screens.settings.WorkingMode
 import com.rk.terminal.ui.screens.terminal.virtualkeys.VirtualKeysListener
 import com.rk.terminal.ui.screens.terminal.virtualkeys.VirtualKeysView
 import com.termux.view.TerminalView
@@ -48,15 +49,24 @@ class TerminalViewModel : ViewModel() {
         val terminal = terminalView ?: return
         val activity = context as? MainActivity ?: return
         val client = TerminalBackEnd(terminal, activity)
-        
+
         val session = sessionBinder.getSession(sessionId)
-            ?: sessionBinder.createSession(sessionId, client, Settings.working_Mode)
-            
+            ?: run {
+                val service = sessionBinder.getService()
+                val custom = if (sessionId == service.currentSession.value.first) service.currentCustomSession else null
+                if (custom != null) {
+                    val pendingCommand = MkSession.buildCustomPendingCommand(context, custom)
+                    sessionBinder.createSession(sessionId, client, WorkingMode.ALPINE, pendingCommand)
+                } else {
+                    sessionBinder.createSession(sessionId, client, Settings.working_Mode)
+                }
+            }
+
         session.updateTerminalSessionClient(client)
         terminal.setBackgroundColor(android.graphics.Color.TRANSPARENT)
         terminal.attachSession(session)
         terminal.setTerminalViewClient(client)
-        
+
         terminal.post {
             val typedValue = TypedValue()
             context.theme.resolveAttribute(R.attr.colorOnSurface, typedValue, true)
@@ -70,11 +80,10 @@ class TerminalViewModel : ViewModel() {
                 set(258, typedValue.data)
             }
         }
-        
+
         virtualKeysView?.apply {
             virtualKeysViewClient = terminal.mTermSession?.let { VirtualKeysListener(it) }
         }
-        
         sessionBinder.getService().currentSession.value = Pair(sessionId, sessionBinder.getService().sessionList[sessionId] ?: Settings.working_Mode)
     }
 }
