@@ -23,6 +23,14 @@ object Settings {
             default = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
         )
         set(value) = Preference.setBoolean(key = "monet",value)
+
+    var selected_palette: String
+        get() = Preference.getString(key = "selected_palette", default = "CATPPUCCIN")
+        set(value) = Preference.setString(key = "selected_palette", value)
+
+    var theme_palette: com.rk.terminal.ui.theme.ThemePalette
+        get() = com.rk.terminal.ui.theme.ThemePalette.fromName(selected_palette)
+        set(value) { selected_palette = value.name }
     var ignore_storage_permission
         get() = Preference.getBoolean(key = "ignore_storage_permission",default = false)
         set(value) = Preference.setBoolean(key = "ignore_storage_permission",value)
@@ -31,9 +39,40 @@ object Settings {
         set(value) = Preference.setBoolean(key = "github",value)
 
 
-   var default_night_mode
-        get() = Preference.getInt(key = "default_night_mode", default = AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
-        set(value) = Preference.setInt(key = "default_night_mode",value)
+    var follow_system_theme
+        get() = Preference.getBoolean(key = "follow_system_theme", default = true)
+        set(value) = Preference.setBoolean(key = "follow_system_theme", value)
+
+    var dark_mode
+        get() = Preference.getBoolean(key = "dark_mode", default = false)
+        set(value) = Preference.setBoolean(key = "dark_mode", value)
+
+    var default_night_mode: Int
+        get() {
+            return if (follow_system_theme) {
+                AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
+            } else if (dark_mode) {
+                AppCompatDelegate.MODE_NIGHT_YES
+            } else {
+                AppCompatDelegate.MODE_NIGHT_NO
+            }
+        }
+        set(value) {
+            when (value) {
+                AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM -> {
+                    follow_system_theme = true
+                }
+                AppCompatDelegate.MODE_NIGHT_YES -> {
+                    follow_system_theme = false
+                    dark_mode = true
+                }
+                AppCompatDelegate.MODE_NIGHT_NO -> {
+                    follow_system_theme = false
+                    dark_mode = false
+                }
+            }
+            Preference.setInt(key = "default_night_mode", value)
+        }
 
     var terminal_font_size
         get() = Preference.getInt(key = "terminal_font_size", default = 13)
@@ -109,6 +148,15 @@ object Settings {
     var shortcuts_enabled
         get() = Preference.getBoolean(key = "shortcuts_enabled", default = true)
         set(value) = Preference.setBoolean(key = "shortcuts_enabled", value)
+
+    const val default_virtual_keys = "[" +
+        "\n  [\"ESC\", {\"key\": \"/\", \"popup\": \"\\\\\"}, {\"key\": \"-\", \"popup\": \"|\"}, \"HOME\", \"UP\", \"END\", \"PGUP\"]," +
+        "\n  [\"TAB\", \"CTRL\", \"ALT\", \"LEFT\", \"DOWN\", \"RIGHT\", \"PGDN\"]" +
+        "\n]"
+
+    var virtual_keys_string: String
+        get() = Preference.getString(key = "virtual_keys_string", default = default_virtual_keys)
+        set(value) = Preference.setString(key = "virtual_keys_string", value)
 
     fun getShortcutBinding(action: com.rk.terminal.ui.screens.terminal.ShortcutAction): com.rk.terminal.ui.screens.terminal.ShortcutBinding {
         val raw = Preference.getString(key = action.prefKey, default = action.default.serialize())

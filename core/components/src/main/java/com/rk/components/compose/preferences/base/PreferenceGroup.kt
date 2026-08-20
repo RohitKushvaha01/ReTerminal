@@ -16,6 +16,7 @@ package com.rk.components.compose.preferences.base
  * limitations under the License.
  */
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -24,6 +25,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -50,8 +52,9 @@ fun PreferenceGroup(
         PreferenceGroupHeading(heading)
         Surface(
             modifier = Modifier.padding(horizontal = 16.dp),
-            shape = MaterialTheme.shapes.large,
-            tonalElevation = 1.dp,
+            shape = RoundedCornerShape(20.dp),
+            color = MaterialTheme.colorScheme.surfaceContainerHigh,
+            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.35f)),
         ) {
             if (showDividers) {
                 DividerColumn(

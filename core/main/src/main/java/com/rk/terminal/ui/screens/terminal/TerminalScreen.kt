@@ -220,8 +220,3 @@ private fun generateUniqueSessionId(existingIds: List<String>): String {
     } while (newId in existingIds)
     return newId
 }
-
-const val VIRTUAL_KEYS = "[" +
-    "\n  [\"ESC\", {\"key\": \"/\", \"popup\": \"\\\\\"}, {\"key\": \"-\", \"popup\": \"|\"}, \"HOME\", \"UP\", \"END\", \"PGUP\"]," +
-    "\n  [\"TAB\", \"CTRL\", \"ALT\", \"LEFT\", \"DOWN\", \"RIGHT\", \"PGDN\"]" +
-    "\n]"

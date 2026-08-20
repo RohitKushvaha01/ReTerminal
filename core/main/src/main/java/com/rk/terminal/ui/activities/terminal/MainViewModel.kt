@@ -22,6 +22,11 @@ class MainViewModel : ViewModel() {
 
     var showStatusBar by mutableStateOf(Settings.statusBar)
     var horizontalStatusBar by mutableStateOf(Settings.horizontal_statusBar)
+    var followSystemTheme by mutableStateOf(Settings.follow_system_theme)
+    var isDarkMode by mutableStateOf(Settings.dark_mode)
+    var isAmoled by mutableStateOf(Settings.amoled)
+    var isMonet by mutableStateOf(Settings.monet)
+    var themePalette by mutableStateOf(Settings.theme_palette)
 
     private val serviceConnection = object : ServiceConnection {
         override fun onServiceConnected(name: ComponentName?, service: IBinder?) {

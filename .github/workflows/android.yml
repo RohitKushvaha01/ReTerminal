@@ -27,10 +27,20 @@ jobs:
         run: yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses || true
 
       - name: Decode and create xed.keystore
-        run: echo "${{ secrets.KEYSTORE }}" | base64 -d > /tmp/xed.keystore
+        run: |
+          if [ -n "${{ secrets.KEYSTORE }}" ]; then
+            echo "${{ secrets.KEYSTORE }}" | base64 -d > /tmp/xed.keystore
+          else
+            touch /tmp/xed.keystore
+          fi
 
       - name: Decode and create signing.properties
-        run: echo "${{ secrets.PROP }}" | base64 -d > /tmp/signing.properties
+        run: |
+          if [ -n "${{ secrets.PROP }}" ]; then
+            echo "${{ secrets.PROP }}" | base64 -d > /tmp/signing.properties
+          else
+            touch /tmp/signing.properties
+          fi
 
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
@@ -56,9 +66,11 @@ jobs:
         run: rm /tmp/xed.keystore /tmp/signing.properties
 
       - name: Send APK to Telegram
-        if: ${{ success() && github.event.head_commit.message != '' }}
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT }}
+        if: ${{ success() && github.event.head_commit.message != '' && env.TELEGRAM_BOT_TOKEN != '' }}
         run: |
-          curl -X POST "https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT }}/sendDocument" \
+          curl -X POST "https://api.telegram.org/bot${{ env.TELEGRAM_BOT_TOKEN }}/sendDocument" \
           -F chat_id="-1002292589492" \
           -F message_thread_id="116" \
           -F caption="${{ github.event.head_commit.message }} by ${{ github.actor }}" \
