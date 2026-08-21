@@ -34,6 +34,11 @@ private fun ColorScheme.toAmoled(): ColorScheme = copy(
     surfaceContainer = Color.Black,
     surfaceContainerHigh = Color.Black,
     surfaceContainerHighest = Color.Black,
+    onBackground = Color(0xFFF2F2F6),
+    onSurface = Color(0xFFF2F2F6),
+    onSurfaceVariant = Color(0xFFC8C8CE),
+    outline = Color(0xFF8E8E93),
+    outlineVariant = Color(0xFF48484E),
 )
 
 @Composable

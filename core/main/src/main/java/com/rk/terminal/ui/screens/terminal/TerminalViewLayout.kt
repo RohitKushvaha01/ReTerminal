@@ -115,6 +115,8 @@ private fun VirtualKeysPager(viewModel: TerminalViewModel) {
     val pagerState = rememberPagerState(pageCount = { 2 })
     val onSurfaceColor = MaterialTheme.colorScheme.onSurface.toArgb()
 
+    val onSurfaceVariantColor = MaterialTheme.colorScheme.onSurfaceVariant.toArgb()
+
     HorizontalPager(
         state = pagerState,
         modifier = Modifier.fillMaxWidth().height(75.dp)
@@ -132,7 +134,10 @@ private fun VirtualKeysPager(viewModel: TerminalViewModel) {
                             reload(VirtualKeysInfo(Settings.virtual_keys_string, "", VirtualKeysConstants.CONTROL_CHARS_ALIASES))
                         }
                     },
-                    modifier = Modifier.fillMaxWidth().height(75.dp)
+                    modifier = Modifier.fillMaxWidth().height(75.dp),
+                    update = { view ->
+                        view.buttonTextColor = onSurfaceColor
+                    }
                 )
             }
             1 -> {
@@ -144,6 +149,9 @@ private fun VirtualKeysPager(viewModel: TerminalViewModel) {
                             maxLines = 1
                             isSingleLine = true
                             imeOptions = EditorInfo.IME_ACTION_DONE
+                            setTextColor(onSurfaceColor)
+                            setHintTextColor(onSurfaceVariantColor)
+                            setBackgroundColor(android.graphics.Color.TRANSPARENT)
                             doOnTextChanged { t, _, _, _ -> text = t.toString() }
                             setOnEditorActionListener { _, actionId, _ ->
                                 if (actionId == EditorInfo.IME_ACTION_DONE) {
@@ -161,6 +169,8 @@ private fun VirtualKeysPager(viewModel: TerminalViewModel) {
                         }
                     },
                     update = { editText ->
+                        editText.setTextColor(onSurfaceColor)
+                        editText.setHintTextColor(onSurfaceVariantColor)
                         if (editText.text.toString() != text) {
                             editText.setText(text)
                             editText.setSelection(text.length)

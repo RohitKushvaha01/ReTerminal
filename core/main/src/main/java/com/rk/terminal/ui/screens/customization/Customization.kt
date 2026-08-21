@@ -378,13 +378,15 @@ private fun BackgroundSection(viewModel: TerminalViewModel) {
         description = { Text(backgroundName) },
         endWidget = {
             if (imageExists) {
-                val isDarkMode = isSystemInDarkTheme()
+                val systemDark = isSystemInDarkTheme()
+                val isDarkActive = if (Settings.follow_system_theme) systemDark else Settings.dark_mode
                 IconButton(onClick = {
                     scope.launch {
                         imageFile.delete()
                         Settings.custom_background_name = noImageSelected
                         backgroundName = noImageSelected
-                        TerminalUtils.darkText.value = !isDarkMode
+                        Settings.blackTextColor = !isDarkActive
+                        TerminalUtils.darkText.value = !isDarkActive
                         TerminalUtils.hasCustomBackground.value = false
                         imageExists = false
                         viewModel.bitmap = null

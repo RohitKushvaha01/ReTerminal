@@ -255,6 +255,21 @@ public final class VirtualKeysView extends GridLayout {
   /** Set {@link #mButtonTextColor}. */
   public void setButtonTextColor(int buttonTextColor) {
     mButtonTextColor = buttonTextColor;
+    for (int i = 0; i < getChildCount(); i++) {
+      View child = getChildAt(i);
+      if (child instanceof Button) {
+        ((Button) child).setTextColor(buttonTextColor);
+      }
+    }
+    if (mSpecialButtons != null) {
+      for (SpecialButtonState state : mSpecialButtons.values()) {
+        if (!state.isActive) {
+          for (Button btn : state.buttons) {
+            btn.setTextColor(buttonTextColor);
+          }
+        }
+      }
+    }
   }
 
   /** Get {@link #mButtonActiveTextColor}. */

@@ -24,6 +24,7 @@ import com.rk.terminal.ui.navHosts.MainActivityNavHost
 import com.rk.terminal.ui.routes.MainActivityRoutes
 import com.rk.terminal.ui.screens.terminal.TerminalViewModel
 import com.rk.terminal.ui.theme.KarbonTheme
+import com.rk.terminal.ui.theme.ThemeManager
 
 class MainActivity : ComponentActivity() {
     val viewModel: MainViewModel by viewModels()
@@ -40,6 +41,7 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        ThemeManager.apply(this)
         enableEdgeToEdge()
         requestPermission()
 

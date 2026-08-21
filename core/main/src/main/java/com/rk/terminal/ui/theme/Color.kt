@@ -108,25 +108,25 @@ fun darkColorSchemeFor(palette: ThemePalette): ColorScheme {
     return darkColorScheme(
         primary = p,
         onPrimary = Color(0xFF000000).blend(p, 0.08f),
-        primaryContainer = p.blend(Color.Black, 0.40f),
-        onPrimaryContainer = p.blend(Color.White, 0.75f),
+        primaryContainer = p.blend(Color.Black, 0.45f),
+        onPrimaryContainer = Color.White,
 
         secondary = s,
         onSecondary = Color(0xFF000000).blend(s, 0.08f),
-        secondaryContainer = s.blend(Color.Black, 0.40f),
-        onSecondaryContainer = s.blend(Color.White, 0.75f),
+        secondaryContainer = s.blend(Color.Black, 0.45f),
+        onSecondaryContainer = Color.White,
 
         tertiary = t,
         onTertiary = Color(0xFF000000).blend(t, 0.08f),
-        tertiaryContainer = t.blend(Color.Black, 0.40f),
-        onTertiaryContainer = t.blend(Color.White, 0.75f),
+        tertiaryContainer = t.blend(Color.Black, 0.45f),
+        onTertiaryContainer = Color.White,
 
         background = base.blend(p, 0.15f),
-        onBackground = Color(0xFFE2E2E6),
+        onBackground = Color(0xFFF2F2F6),
         surface = base.blend(p, 0.15f),
-        onSurface = Color(0xFFE2E2E6),
+        onSurface = Color(0xFFF2F2F6),
         surfaceVariant = Color(0xFF2B2B2F).blend(p, 0.25f),
-        onSurfaceVariant = Color(0xFFC6C6CA),
+        onSurfaceVariant = Color(0xFFC8C8CE),
 
         surfaceContainer = Color(0xFF1E1E22).blend(p, 0.20f),
         surfaceContainerHigh = Color(0xFF282830).blend(p, 0.22f),
@@ -135,9 +135,9 @@ fun darkColorSchemeFor(palette: ThemePalette): ColorScheme {
         surfaceContainerLowest = Color(0xFF0F0F13).blend(p, 0.15f),
 
         outline = Color(0xFF8E8E93).blend(p, 0.35f),
-        outlineVariant = Color(0xFF46464A).blend(p, 0.30f),
-        inverseSurface = Color(0xFFE2E2E6),
-        inverseOnSurface = Color(0xFF303034),
+        outlineVariant = Color(0xFF525258).blend(p, 0.30f),
+        inverseSurface = Color(0xFFF2F2F6),
+        inverseOnSurface = Color(0xFF1C1C20),
         inversePrimary = palette.primaryLight
     )
 }
