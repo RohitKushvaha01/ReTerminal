@@ -283,37 +283,55 @@ private fun FontSection(viewModel: TerminalViewModel) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val fontFile = context.filesDir.child("font.ttf")
-    var fontExists by remember { mutableStateOf(fontFile.exists()) }
+    var fontExists by remember { mutableStateOf(fontFile.exists() && fontFile.canRead()) }
     val noFontSelected = stringResource(strings.no_font_selected)
-    var fontName by remember { mutableStateOf(if (!fontExists || !fontFile.canRead()) noFontSelected else Settings.custom_font_name) }
+    var fontName by remember { mutableStateOf(if (!fontExists) noFontSelected else Settings.custom_font_name) }
 
-val fontLauncher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
-    uri?.let {
-        scope.launch(Dispatchers.IO) {
-            try {
-                fontFile.createFileIfNot()
-                context.contentResolver.openInputStream(it)?.use { input ->
-                    fontFile.outputStream().use { output -> input.copyTo(output) }
-                } ?: throw IllegalStateException("openInputStream returned null")
-                val name = context.getFileNameFromUri(it).toString()
-                Settings.custom_font_name = name
-                withContext(Dispatchers.Main) {
-                    fontName = name
-                    fontExists = true
+    val fontLauncher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
+        uri ?: return@rememberLauncherForActivityResult
+        scope.launch {
+            val loadedName = withContext(Dispatchers.IO) {
+                try {
+                    val name = context.getFileNameFromUri(uri)?.takeIf { it.isNotBlank() } ?: "font.ttf"
+                    val input = context.contentResolver.openInputStream(uri)
+                    if (input == null) {
+                        return@withContext null
+                    }
+                    input.use { stream ->
+                        fontFile.outputStream().use { output ->
+                            stream.copyTo(output)
+                        }
+                    }
+                    Settings.custom_font_name = name
+                    name
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    null
+                }
+            }
+            if (loadedName != null) {
+                fontName = loadedName
+                fontExists = true
+                try {
                     viewModel.setFont(Typeface.createFromFile(fontFile))
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    android.widget.Toast.makeText(context, "Failed to load font", android.widget.Toast.LENGTH_LONG).show()
                 }
-            } catch (e: Exception) {
-                e.printStackTrace()
-                withContext(Dispatchers.Main) {
-                    android.widget.Toast.makeText(context, "Failed to load font: ${e.message}", android.widget.Toast.LENGTH_LONG).show()
-                }
+            } else {
+                android.widget.Toast.makeText(
+                    context,
+                    "Failed to load font",
+                    android.widget.Toast.LENGTH_LONG
+                ).show()
             }
         }
     }
-}
 
     PreferenceTemplate(
-        modifier = Modifier.clickable { fontLauncher.launch("font/ttf") },
+        modifier = Modifier.clickable {
+            fontLauncher.launch("font/ttf")
+        },
         title = { Text(stringResource(strings.custom_font)) },
         description = { Text(fontName) },
         endWidget = {

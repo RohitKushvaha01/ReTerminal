@@ -177,6 +177,57 @@ object MkSession {
             env = null
         )
     }
+
+    fun buildScriptPendingCommand(
+        context: Context,
+        script: File,
+        workingMode: Int,
+        custom: CustomSession? = null
+    ): PendingCommand {
+        val workingDir = script.parentFile?.absolutePath
+        return if (custom != null) {
+            val sysSh = File("/system/bin/sh")
+            if (sysSh.canExecute()) {
+                PendingCommand(
+                    shell = sysSh.absolutePath,
+                    args = arrayOf("-c", "'${custom.shellPath}' '${script.absolutePath}'"),
+                    workingDir = workingDir,
+                    env = null
+                )
+            } else {
+                val proot = "${context.applicationInfo.nativeLibraryDir}/libproot.so"
+                PendingCommand(
+                    shell = proot,
+                    args = arrayOf(
+                        "-r", "/",
+                        "-b", "/dev",
+                        "-b", "/proc",
+                        "-b", "/sdcard",
+                        "-0",
+                        "sh", custom.shellPath, script.absolutePath
+                    ),
+                    workingDir = workingDir,
+                    env = null
+                )
+            }
+        } else if (workingMode == WorkingMode.ALPINE) {
+            val initFile = context.localBinDir()
+                .child(if (Rootfs.execMode.value == ExecMode.CHROOT) "init-host-chroot" else "init-host")
+            PendingCommand(
+                shell = "/system/bin/sh",
+                args = arrayOf("-c", "'${initFile.absolutePath}' sh '${script.absolutePath}'"),
+                workingDir = workingDir,
+                env = null
+            )
+        } else {
+            PendingCommand(
+                shell = "/system/bin/sh",
+                args = arrayOf("-c", script.absolutePath),
+                workingDir = workingDir,
+                env = null
+            )
+        }
+    }
 }
 
 data class PendingCommand(
