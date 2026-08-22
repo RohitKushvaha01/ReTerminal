@@ -126,7 +126,7 @@ object MkSession {
             val shell = if (pendingCommand == null) {
                 args = if (workingMode == WorkingMode.ALPINE) {
                     val targetInit = if (useChroot) initChrootFile else initFile
-                    arrayOf("-c", targetInit.absolutePath)
+                    arrayOf("-c",targetInit.absolutePath)
                 } else {
                     arrayOf()
                 }
@@ -215,7 +215,7 @@ object MkSession {
                 .child(if (Rootfs.execMode.value == ExecMode.CHROOT) "init-host-chroot" else "init-host")
             PendingCommand(
                 shell = "/system/bin/sh",
-                args = arrayOf("-c", "'${initFile.absolutePath}' sh '${script.absolutePath}'"),
+                args = arrayOf("-c",initFile.absolutePath,"sh",script.absolutePath),
                 workingDir = workingDir,
                 env = null
             )
