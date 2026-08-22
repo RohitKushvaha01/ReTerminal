@@ -8,6 +8,12 @@ if [ -z "$(ls -A "$ALPINE_DIR" | grep -vE '^(root|tmp)$')" ]; then
     tar -xf "$PREFIX/files/alpine.tar.gz" -C "$ALPINE_DIR"
 fi
 
+if [ -f "$BIN/rm" ]; then
+    rm -f "$ALPINE_DIR/bin/rm"
+    cp "$BIN/rm" "$ALPINE_DIR/bin/rm"
+    chmod +x "$ALPINE_DIR/bin/rm"
+fi
+
 MOUNTS=""
 
 mnt_bind() {

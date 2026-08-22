@@ -65,6 +65,16 @@ object MkSession {
                 }
             }
 
+            localBinDir().child("rm").apply {
+                if (exists().not()) {
+                    createFileIfNot()
+                    assets.open("rm-wrapper.sh").bufferedReader().use { it.readText() }.let {
+                        writeText(it)
+                    }
+                    setExecutable(true)
+                }
+            }
+
             val env = mutableListOf(
                 "PATH=${System.getenv("PATH")}:/sbin:${localBinDir().absolutePath}",
                 "HOME=/sdcard",

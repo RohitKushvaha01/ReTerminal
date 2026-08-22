@@ -32,6 +32,19 @@ class UpdateManager(private val context: Context) {
                     initFilex.writeText(it)
                 }
             }
+
+            val rmFile: File = localBinDir().child("rm")
+            if (rmFile.exists()) {
+                rmFile.delete()
+            }
+
+            if (rmFile.exists().not()) {
+                rmFile.createFileIfNot()
+                assets.open("rm-wrapper.sh").bufferedReader().use { it.readText() }.let {
+                    rmFile.writeText(it)
+                }
+                rmFile.setExecutable(true)
+            }
         }
     }
 }
