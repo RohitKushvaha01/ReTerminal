@@ -68,16 +68,16 @@ class TerminalViewModel : ViewModel() {
         terminal.setTerminalViewClient(client)
 
         terminal.post {
-            val typedValue = TypedValue()
-            context.theme.resolveAttribute(R.attr.colorOnSurface, typedValue, true)
+            val fgColor = TerminalUtils.getViewColor()
+            val bgColor = TerminalUtils.getBackgroundColor()
             terminal.keepScreenOn = true
             terminal.requestFocus()
             terminal.isFocusableInTouchMode = true
 
             terminal.mEmulator?.mColors?.mCurrentColors?.apply {
-                set(256, typedValue.data)
-                set(257, TerminalUtils.getBackgroundColor())
-                set(258, typedValue.data)
+                set(256, fgColor)
+                set(257, bgColor)
+                set(258, fgColor)
             }
         }
 
