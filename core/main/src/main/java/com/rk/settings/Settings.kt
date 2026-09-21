@@ -1,5 +1,7 @@
 package com.rk.settings
 
+import android.util.Log
+
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.SharedPreferences
@@ -223,7 +225,7 @@ object Preference {
             return boolCache[key] ?: sharedPreferences.getBoolean(key, default)
                 .also { boolCache[key] = it }
         }.onFailure {
-            it.printStackTrace()
+            Log.e("ReTerminal", "Error", it)
             setBoolean(key, default)
         }
         return default
@@ -235,7 +237,7 @@ object Preference {
             val editor = sharedPreferences.edit()
             editor.putBoolean(key, value)
             editor.apply()
-        }.onFailure { it.printStackTrace() }
+        }.onFailure { Log.e("ReTerminal", "Error", it) }
     }
 
     fun getString(key: String, default: String): String {
@@ -243,7 +245,7 @@ object Preference {
             return stringCache[key] ?: sharedPreferences.getString(key, default)!!
                 .also { stringCache[key] = it }
         }.onFailure {
-            it.printStackTrace()
+            Log.e("ReTerminal", "Error", it)
             setString(key, default)
         }
         return default
@@ -255,7 +257,7 @@ object Preference {
             editor.putString(key, value)
             editor.apply()
         }.onFailure {
-            it.printStackTrace()
+            Log.e("ReTerminal", "Error", it)
         }
 
     }
@@ -265,7 +267,7 @@ object Preference {
             return intCache[key] ?: sharedPreferences.getInt(key, default)
                 .also { intCache[key] = it }
         }.onFailure {
-            it.printStackTrace()
+            Log.e("ReTerminal", "Error", it)
             setInt(key, default)
         }
         return default
@@ -278,7 +280,7 @@ object Preference {
             editor.putInt(key, value)
             editor.apply()
         }.onFailure {
-            it.printStackTrace()
+            Log.e("ReTerminal", "Error", it)
         }
 
     }
@@ -288,7 +290,7 @@ object Preference {
             return longCache[key] ?: sharedPreferences.getLong(key, default)
                 .also { longCache[key] = it }
         }.onFailure {
-            it.printStackTrace()
+            Log.e("ReTerminal", "Error", it)
             setLong(key, default)
         }
         return default
@@ -301,7 +303,7 @@ object Preference {
             editor.putLong(key,value)
             editor.apply()
         }.onFailure {
-            it.printStackTrace()
+            Log.e("ReTerminal", "Error", it)
         }
     }
 
@@ -310,7 +312,7 @@ object Preference {
             return floatCache[key] ?: sharedPreferences.getFloat(key, default)
                 .also { floatCache[key] = it }
         }.onFailure {
-            it.printStackTrace()
+            Log.e("ReTerminal", "Error", it)
             setFloat(key, default)
         }
         return default
@@ -323,7 +325,7 @@ object Preference {
             editor.putFloat(key,value)
             editor.apply()
         }.onFailure {
-            it.printStackTrace()
+            Log.e("ReTerminal", "Error", it)
         }
     }
 

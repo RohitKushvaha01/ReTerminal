@@ -1,5 +1,7 @@
 package com.rk.terminal.ui.screens.customization
 
+import android.util.Log
+
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Typeface
@@ -305,7 +307,7 @@ private fun FontSection(viewModel: TerminalViewModel) {
                     Settings.custom_font_name = name
                     name
                 } catch (e: Exception) {
-                    e.printStackTrace()
+                    Log.e("ReTerminal", "Error", e)
                     null
                 }
             }
@@ -315,7 +317,7 @@ private fun FontSection(viewModel: TerminalViewModel) {
                 try {
                     viewModel.setFont(Typeface.createFromFile(fontFile))
                 } catch (e: Exception) {
-                    e.printStackTrace()
+                    Log.e("ReTerminal", "Error", e)
                     android.widget.Toast.makeText(context, "Failed to load font", android.widget.Toast.LENGTH_LONG).show()
                 }
             } else {

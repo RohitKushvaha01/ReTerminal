@@ -1,5 +1,7 @@
 package com.rk.terminal
 
+import android.util.Log
+
 import android.app.Application
 import android.content.Context
 import android.os.Build
@@ -54,7 +56,7 @@ class App : Application() {
                     penaltyLog()
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
                         penaltyListener(Executors.newSingleThreadExecutor()) { violation ->
-                            violation.printStackTrace()
+                            Log.e("ReTerminal", "Violation", violation)
                         }
                     }
                 }.build()

@@ -45,14 +45,14 @@ fun toast(message: String?) {
 }
 
  fun toast(e: Exception? = null) {
-    e?.printStackTrace()
+    e?.let { Log.e("ReTerminal", "Error", it) }
     if (e != null) {
         toast(e.message)
     }
 }
 
  fun toast(t: Throwable? = null) {
-    t?.printStackTrace()
+    t?.let { Log.e("ReTerminal", "Error", it) }
     toast(t?.message)
 }
 
@@ -65,7 +65,7 @@ fun toast(message: String?) {
         block()
         return null
     } catch (e: Exception) {
-        e.printStackTrace()
+        Log.e("ReTerminal", "Error", e)
         toast(e.message)
         if (BuildConfig.DEBUG) {
             throw e

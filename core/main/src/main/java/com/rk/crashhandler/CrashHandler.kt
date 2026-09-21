@@ -1,5 +1,7 @@
 package com.rk.crashhandler
 
+import android.util.Log
+
 import android.os.Looper
 import com.rk.libcommons.application
 import com.rk.libcommons.child
@@ -12,7 +14,7 @@ object CrashHandler : Thread.UncaughtExceptionHandler {
         runCatching {
 
         }.onFailure {
-            it.printStackTrace()
+            Log.e("ReTerminal", "Error", it)
             exitProcess(1)
         }
 
@@ -35,5 +37,5 @@ object CrashHandler : Thread.UncaughtExceptionHandler {
 fun logErrorOrExit(throwable: Throwable){
     runCatching {
         application!!.filesDir.child("crash.log").createFileIfNot().appendText(throwable.toString())
-    }.onFailure { it.printStackTrace();exitProcess(-1) }
+    }.onFailure { Log.e("ReTerminal", "Error", it);exitProcess(-1) }
 }
