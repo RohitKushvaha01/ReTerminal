@@ -165,13 +165,11 @@ fun Settings(
                     Rootfs.downloadWolfi(context)
                 }
             }
-            if (selectedDistro == Distro.WOLFI) {
-                SettingsCard(
-                    title = { Text("Check for rootfs update") },
-                    description = { Text("Get the latest Wolfi rootfs, keeps your data and settings") },
-                    onClick = { Rootfs.checkWolfiUpdate(context) }
-                )
-            }
+            SettingsCard(
+                title = { Text("Check for rootfs update") },
+                description = { Text("Updates the rootfs in place, keeps your data and settings") },
+                onClick = { Rootfs.checkRootfsUpdate(context) }
+            )
         }
 
         PreferenceGroup(heading = "Execution Mode") {

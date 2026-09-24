@@ -15,7 +15,7 @@ Download the latest APK from the [Releases Section](https://github.com/RohitKush
 - [x] Multiple Sessions
 - [x] Alpine Linux support (musl)
 - [x] Wolfi OS support (glibc)
-- [x] Wolfi rootfs update check from Settings (keeps your data)
+- [x] Rootfs update check from Settings for Alpine and Wolfi (keeps your data)
 - [x] Configurable Keyboard Shortcuts (Paste, Session Management)
 
 # Alpine (musl) vs Wolfi (glibc)

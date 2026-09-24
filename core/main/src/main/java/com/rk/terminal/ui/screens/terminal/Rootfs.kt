@@ -26,12 +26,14 @@ enum class ExecMode(val value: Int) {
 
 object Rootfs {
     private const val WOLFI_UPDATED_AT = "wolfi_updated_at"
+    private const val ALPINE_VERSION = "alpine_rootfs_version"
+    private const val ALPINE_LATEST = "https://dl-cdn.alpinelinux.org/alpine/latest-stable/releases"
 
     var isInstalled = mutableStateOf(false)
     var execMode = mutableStateOf(ExecMode.fromInt(Settings.exec_mode))
 
     @Volatile
-    private var wolfiDownloading = false
+    private var rootfsSyncing = false
 
     fun setExecMode(mode: ExecMode) {
         execMode.value = mode
@@ -51,10 +53,16 @@ object Rootfs {
 
     fun downloadWolfi(context: Context) = syncWolfi(context, checkFirst = false)
 
-    fun checkWolfiUpdate(context: Context) = syncWolfi(context, checkFirst = true)
+    fun checkRootfsUpdate(context: Context) {
+        if (Settings.distro == Distro.WOLFI) {
+            syncWolfi(context, checkFirst = true)
+        } else {
+            syncAlpine(context)
+        }
+    }
 
     private fun syncWolfi(context: Context, checkFirst: Boolean) {
-        if (wolfiDownloading) return
+        if (rootfsSyncing) return
         if (!checkFirst && isWolfiDownloaded(context)) return
         val abi = Build.SUPPORTED_ABIS.firstOrNull { it == "arm64-v8a" || it == "x86_64" }
         if (abi == null) {
@@ -62,7 +70,7 @@ object Rootfs {
             return
         }
         val arch = if (abi == "arm64-v8a") "aarch64" else "x86_64"
-        wolfiDownloading = true
+        rootfsSyncing = true
         if (!checkFirst) toast("Downloading Wolfi rootfs (~24 MB)")
         Thread {
             val tmp = context.filesDir.child("wolfi.tar.gz.part")
@@ -73,29 +81,7 @@ object Rootfs {
                     return@Thread
                 }
                 if (checkFirst) toast("Updating Wolfi rootfs...")
-                var downloadUrl = url
-                var redirects = 0
-                while (true) {
-                    val conn = URL(downloadUrl).openConnection() as HttpURLConnection
-                    conn.connectTimeout = 15000
-                    conn.readTimeout = 60000
-                    conn.instanceFollowRedirects = false
-                    when (val code = conn.responseCode) {
-                        in 200..299 -> {
-                            conn.inputStream.use { input ->
-                                FileOutputStream(tmp).use { output -> input.copyTo(output) }
-                            }
-                            conn.disconnect()
-                            break
-                        }
-                        301, 302, 303, 307, 308 -> {
-                            downloadUrl = conn.getHeaderField("Location") ?: throw IOException("Missing redirect location")
-                            conn.disconnect()
-                            if (++redirects > 5) throw IOException("Too many redirects")
-                        }
-                        else -> throw IOException("HTTP $code")
-                    }
-                }
+                downloadTo(url, tmp)
                 val target = context.filesDir.child("wolfi.tar.gz")
                 if (!tmp.renameTo(target)) {
                     tmp.copyTo(target, overwrite = true)
@@ -111,9 +97,89 @@ object Rootfs {
                 tmp.delete()
                 toast("Wolfi ${if (checkFirst) "update" else "download"} failed: ${e.message}")
             } finally {
-                wolfiDownloading = false
+                rootfsSyncing = false
             }
         }.start()
+    }
+
+    private fun syncAlpine(context: Context) {
+        if (rootfsSyncing) return
+        val abi = Build.SUPPORTED_ABIS.firstOrNull { it == "arm64-v8a" || it == "armeabi-v7a" || it == "x86_64" }
+        if (abi == null) {
+            toast("Unsupported CPU architecture: ${Build.SUPPORTED_ABIS.joinToString()}")
+            return
+        }
+        val arch = when (abi) {
+            "arm64-v8a" -> "aarch64"
+            "armeabi-v7a" -> "armhf"
+            else -> "x86_64"
+        }
+        rootfsSyncing = true
+        Thread {
+            val tmp = context.filesDir.child("alpine.tar.gz.part")
+            try {
+                val (version, url) = fetchAlpineRelease(arch)
+                val target = context.filesDir.child("alpine.tar.gz")
+                if (target.exists() && Preference.getString(ALPINE_VERSION, "") == version) {
+                    toast("Alpine rootfs is up to date")
+                    return@Thread
+                }
+                toast("Updating Alpine rootfs...")
+                downloadTo(url, tmp)
+                if (!tmp.renameTo(target)) {
+                    tmp.copyTo(target, overwrite = true)
+                    tmp.delete()
+                }
+                val dir = context.localDir().child("alpine")
+                if (dir.exists() && dir.list()?.isNotEmpty() == true) {
+                    extractRootfs(target, dir)
+                }
+                Preference.setString(ALPINE_VERSION, version)
+                toast("Alpine rootfs updated")
+            } catch (e: Exception) {
+                tmp.delete()
+                toast("Alpine update failed: ${e.message}")
+            } finally {
+                rootfsSyncing = false
+            }
+        }.start()
+    }
+
+    private fun downloadTo(url: String, tmp: File) {
+        var current = url
+        var redirects = 0
+        while (true) {
+            val conn = URL(current).openConnection() as HttpURLConnection
+            conn.connectTimeout = 15000
+            conn.readTimeout = 60000
+            conn.instanceFollowRedirects = false
+            when (val code = conn.responseCode) {
+                in 200..299 -> {
+                    conn.inputStream.use { input ->
+                        FileOutputStream(tmp).use { output -> input.copyTo(output) }
+                    }
+                    conn.disconnect()
+                    return
+                }
+                301, 302, 303, 307, 308 -> {
+                    current = conn.getHeaderField("Location") ?: throw IOException("Missing redirect location")
+                    conn.disconnect()
+                    if (++redirects > 5) throw IOException("Too many redirects")
+                }
+                else -> throw IOException("HTTP $code")
+            }
+        }
+    }
+
+    private fun fetchAlpineRelease(arch: String): Pair<String, String> {
+        val conn = URL("$ALPINE_LATEST/$arch/latest-releases.yaml").openConnection() as HttpURLConnection
+        conn.connectTimeout = 15000
+        conn.readTimeout = 30000
+        val yaml = conn.inputStream.bufferedReader().use { it.readText() }
+        conn.disconnect()
+        val match = Regex("alpine-minirootfs-([0-9]+(?:\\.[0-9]+)+)-$arch\\.tar\\.gz").find(yaml)
+            ?: throw IOException("No minirootfs release for $arch")
+        return match.groupValues[1] to "$ALPINE_LATEST/$arch/${match.value}"
     }
 
     private fun fetchWolfiRelease(arch: String): Pair<String, String> {
@@ -141,6 +207,7 @@ object Rootfs {
         if (process.waitFor() != 0) {
             throw IOException("Extract failed${if (output.isBlank()) "" else ": $output.trim()"}")
         }
+        File(dir, "etc/reterm_provisioned").delete()
     }
 
     fun isWolfiDownloaded(context: Context): Boolean {
