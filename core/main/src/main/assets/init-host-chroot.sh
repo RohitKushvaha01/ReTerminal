@@ -1,11 +1,16 @@
 #!/bin/sh
 SU="/system/bin/su"
-ALPINE_DIR=$PREFIX/local/alpine
+ALPINE_DIR=${ROOTFS_DIR:-$PREFIX/local/alpine}
+ROOTFS_TAR=${ROOTFS_TAR:-$PREFIX/files/alpine.tar.gz}
 
 mkdir -p $ALPINE_DIR
 
 if [ -z "$(ls -A "$ALPINE_DIR" | grep -vE '^(root|tmp)$')" ]; then
-    tar -xf "$PREFIX/files/alpine.tar.gz" -C "$ALPINE_DIR"
+    if [ ! -f "$ROOTFS_TAR" ]; then
+        echo "ReTerminal: rootfs archive not found: $ROOTFS_TAR"
+        exit 1
+    fi
+    tar -xf "$ROOTFS_TAR" -C "$ALPINE_DIR"
 fi
 
 if [ -f "$BIN/rm" ]; then
@@ -58,10 +63,10 @@ if [ -e "/proc/self/fd/0" ]; then mnt_bind /proc/self/fd/0 /dev/stdin; fi
 if [ -e "/proc/self/fd/1" ]; then mnt_bind /proc/self/fd/1 /dev/stdout; fi
 if [ -e "/proc/self/fd/2" ]; then mnt_bind /proc/self/fd/2 /dev/stderr; fi
 
-if [ ! -d "$PREFIX/local/alpine/tmp" ]; then
-    $SU -c "mkdir -p '$PREFIX/local/alpine/tmp' && chmod 1777 '$PREFIX/local/alpine/tmp'"
+if [ ! -d "$ALPINE_DIR/tmp" ]; then
+    $SU -c "mkdir -p '$ALPINE_DIR/tmp' && chmod 1777 '$ALPINE_DIR/tmp'"
 fi
-mnt_bind "$PREFIX/local/alpine/tmp" /dev/shm
+mnt_bind "$ALPINE_DIR/tmp" /dev/shm
 
 if [ -e "$PREFIX/local/stat" ]; then
     $SU -c "cp '$PREFIX/local/stat' '$ALPINE_DIR/proc/stat'" 2>/dev/null

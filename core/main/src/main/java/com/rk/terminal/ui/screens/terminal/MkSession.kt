@@ -9,7 +9,7 @@ import com.rk.libcommons.localDir
 import com.rk.libcommons.localLibDir
 import com.rk.terminal.App.Companion.getTempDir
 import com.rk.terminal.BuildConfig
-import com.rk.settings.Settings
+import com.rk.terminal.ui.screens.settings.Distro
 import com.rk.terminal.ui.screens.settings.WorkingMode
 import com.termux.terminal.TerminalEmulator
 import com.termux.terminal.TerminalSession
@@ -76,6 +76,8 @@ object MkSession {
                 }
             }
 
+            val isWolfi = Rootfs.distro.value == Distro.WOLFI
+            val rootfsName = if (isWolfi) "wolfi" else "alpine"
             val env = mutableListOf(
                 "PATH=${System.getenv("PATH")}:/sbin:${localBinDir().absolutePath}",
                 "HOME=/sdcard",
@@ -98,7 +100,9 @@ object MkSession {
                 "PROOT=${applicationInfo.nativeLibraryDir}/libproot.so",
                 "CHROOT=${if (File("/system/bin/chroot").exists()) "/system/bin/chroot" else "/system/xbin/chroot"}",
                 "USE_CHROOT=${if (useChroot) "1" else "0"}",
-                "RETERM_LOGIN_SHELL=${Settings.login_shell}",
+                "RETERM_LOGIN_SHELL=${Rootfs.loginShell.value}",
+                "ROOTFS_TAR=${filesDir}/$rootfsName.tar.gz",
+                "ROOTFS_DIR=${localDir()}/$rootfsName",
             )
 
             val loader32 = "${applicationInfo.nativeLibraryDir}/libloader32.so"

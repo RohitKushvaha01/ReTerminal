@@ -9,6 +9,7 @@ import com.rk.libcommons.application
 import com.rk.terminal.ui.screens.settings.WorkingMode
 import com.rk.terminal.ui.screens.settings.InputMode
 import com.rk.terminal.ui.screens.settings.LoginShell
+import com.rk.terminal.ui.screens.settings.Distro
 
 object Settings {
     //Boolean
@@ -98,6 +99,10 @@ object Settings {
     var login_shell
         get() = Preference.getInt(key = "login_shell", default = LoginShell.DISTRO)
         set(value) = Preference.setInt(key = "login_shell", value)
+
+    var distro
+        get() = Preference.getInt(key = "distro", default = Distro.ALPINE)
+        set(value) = Preference.setInt(key = "distro", value)
 
     var default_is_custom
         get() = Preference.getBoolean(key = "default_is_custom", default = false)

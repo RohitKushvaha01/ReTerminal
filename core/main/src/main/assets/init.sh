@@ -22,7 +22,7 @@ if [ "$#" -eq 0 ]; then
     if [ ! -f /etc/reterm_provisioned ]; then
         echo "ReTerminal: first boot setup - apk update, apk upgrade, installing bash curl git"
         if apk update && apk upgrade && apk add bash curl git; then
-            sed -i '/^root:/s|/bin/sh$|/bin/bash|' /etc/passwd
+            sed -i '/^root:/s|/bin/[a-z]*sh$|/bin/bash|' /etc/passwd
             touch /etc/reterm_provisioned
             echo "ReTerminal: first boot setup finished"
         else
@@ -37,7 +37,7 @@ if [ "$#" -eq 0 ]; then
         source /initrc
     fi
 
-    shell_bin=/bin/ash
+    shell_bin=""
     case "${RETERM_LOGIN_SHELL:-0}" in
         1)
             if [ ! -x /bin/bash ]; then
@@ -55,7 +55,17 @@ if [ "$#" -eq 0 ]; then
         3)
             shell_bin=/bin/ash
             ;;
+        *)
+            if grep -q 'ID=wolfi' /etc/os-release; then
+                shell_bin=/bin/sh
+            else
+                shell_bin=/bin/ash
+            fi
+            ;;
     esac
+    if [ ! -x "$shell_bin" ]; then
+        shell_bin=/bin/sh
+    fi
     exec "$shell_bin"
 else
     exec "$@"

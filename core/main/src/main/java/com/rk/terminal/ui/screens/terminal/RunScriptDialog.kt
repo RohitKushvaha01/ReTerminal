@@ -24,6 +24,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.rk.resources.strings
+import com.rk.terminal.ui.screens.settings.Distro
 import com.rk.terminal.ui.screens.settings.WorkingMode
 
 @Composable
@@ -33,6 +34,9 @@ fun RunScriptDialog(
     onRun: (Int, CustomSession?) -> Unit
 ) {
     val customSessions = remember { CustomSessions.getAll() }
+    val isWolfi = Rootfs.distro.value == Distro.WOLFI
+    val rootfsTitle = if (isWolfi) "Wolfi" else "Alpine"
+    val rootfsDesc = if (isWolfi) "Wolfi Linux (glibc)" else stringResource(strings.alpine_desc)
     var selectedMode by remember { mutableIntStateOf(WorkingMode.ALPINE) }
     var selectedCustom by remember { mutableStateOf<CustomSession?>(null) }
     var selectedIsCustom by remember { mutableStateOf(false) }
@@ -60,8 +64,8 @@ fun RunScriptDialog(
                 )
                 Spacer(Modifier.height(8.dp))
                 ScriptSessionOption(
-                    title = "Alpine",
-                    description = stringResource(strings.alpine_desc),
+                    title = rootfsTitle,
+                    description = rootfsDesc,
                     selected = !selectedIsCustom && selectedMode == WorkingMode.ALPINE
                 ) { select(WorkingMode.ALPINE, null, false) }
                 ScriptSessionOption(

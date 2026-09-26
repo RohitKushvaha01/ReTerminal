@@ -33,6 +33,7 @@ import com.rk.resources.strings
 import com.rk.terminal.ui.activities.terminal.MainActivity
 import com.rk.terminal.ui.activities.terminal.MainViewModel
 import com.rk.terminal.ui.components.SetStatusBarTextColor
+import com.rk.terminal.ui.screens.settings.Distro
 import com.rk.terminal.ui.screens.settings.SettingsCard
 import com.rk.terminal.ui.screens.settings.WorkingMode
 import com.rk.terminal.ui.screens.terminal.virtualkeys.VirtualKeysListener
@@ -189,11 +190,14 @@ private fun AddSessionDialog(
     onCreateCustomSession: (CustomSession) -> Unit
 ) {
     val customSessions = remember { CustomSessions.getAll() }
+    val isWolfi = Rootfs.distro.value == Distro.WOLFI
+    val rootfsTitle = if (isWolfi) "Wolfi" else "Alpine"
+    val rootfsDesc = if (isWolfi) "Wolfi Linux (glibc)" else stringResource(strings.alpine_desc)
     BasicAlertDialog(onDismissRequest = onDismiss) {
         PreferenceGroup {
             SettingsCard(
-                title = { Text("Alpine") },
-                description = { Text(stringResource(strings.alpine_desc)) },
+                title = { Text(rootfsTitle) },
+                description = { Text(rootfsDesc) },
                 onClick = { onCreateSession(WorkingMode.ALPINE) }
             )
             SettingsCard(

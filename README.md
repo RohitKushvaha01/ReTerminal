@@ -13,8 +13,25 @@ Download the latest APK from the [Releases Section](https://github.com/RohitKush
 - [x] Basic Terminal
 - [x] Virtual Keys
 - [x] Multiple Sessions
-- [x] Alpine Linux support
+- [x] Alpine Linux support (musl)
+- [x] Wolfi OS support (glibc)
+- [x] Wolfi rootfs update check from Settings (keeps your data)
 - [x] Configurable Keyboard Shortcuts (Paste, Session Management)
+
+# Alpine (musl) vs Wolfi (glibc)
+Switch between them in **Settings > Distribution**.
+
+|  | Alpine | Wolfi |
+|---|---|---|
+| libc | musl | **glibc** |
+| package manager | apk | apk |
+| rootfs size | ~5 MB | ~24 MB (auto-downloaded) |
+| prebuilt binaries | need a musl build (PyPI wheels usually don't work) | work out of the box, same as Ubuntu/Debian |
+| heavy allocation speed | baseline | ~2x faster |
+| build times | much slower (e.g. tensorflow 104m vs 2m54s) | fast |
+| patching | manual | daily rebuilds, container-hardened |
+
+**Why glibc?** It is what the vast majority of Linux software is built against, so upstream binaries, PyPI wheels and Docker-era tooling just work without rebuilding. musl stays the better pick when you want the smallest possible footprint.
 
 # Screenshots
 <div>

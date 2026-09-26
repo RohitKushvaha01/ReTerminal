@@ -1,9 +1,14 @@
-ALPINE_DIR=$PREFIX/local/alpine
+ALPINE_DIR=${ROOTFS_DIR:-$PREFIX/local/alpine}
+ROOTFS_TAR=${ROOTFS_TAR:-$PREFIX/files/alpine.tar.gz}
 
 mkdir -p $ALPINE_DIR
 
 if [ -z "$(ls -A "$ALPINE_DIR" | grep -vE '^(root|tmp)$')" ]; then
-    tar -xf "$PREFIX/files/alpine.tar.gz" -C "$ALPINE_DIR"
+    if [ ! -f "$ROOTFS_TAR" ]; then
+        echo "ReTerminal: rootfs archive not found: $ROOTFS_TAR"
+        exit 1
+    fi
+    tar -xf "$ROOTFS_TAR" -C "$ALPINE_DIR"
 fi
 
 if [ -f "$BIN/rm" ]; then
@@ -57,13 +62,13 @@ fi
 ARGS="$ARGS -b $PREFIX"
 ARGS="$ARGS -b /sys"
 
-if [ ! -d "$PREFIX/local/alpine/tmp" ]; then
- mkdir -p "$PREFIX/local/alpine/tmp"
- chmod 1777 "$PREFIX/local/alpine/tmp"
+if [ ! -d "$ALPINE_DIR/tmp" ]; then
+ mkdir -p "$ALPINE_DIR/tmp"
+ chmod 1777 "$ALPINE_DIR/tmp"
 fi
-ARGS="$ARGS -b $PREFIX/local/alpine/tmp:/dev/shm"
+ARGS="$ARGS -b $ALPINE_DIR/tmp:/dev/shm"
 
-ARGS="$ARGS -r $PREFIX/local/alpine"
+ARGS="$ARGS -r $ALPINE_DIR"
 ARGS="$ARGS -0"
 ARGS="$ARGS --link2symlink"
 ARGS="$ARGS --sysvipc"
