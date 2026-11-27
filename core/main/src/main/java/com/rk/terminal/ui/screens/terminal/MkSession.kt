@@ -1,15 +1,13 @@
 package com.rk.terminal.ui.screens.terminal
 
 import android.content.Context
-import com.rk.libcommons.alpineHomeDir
+import com.rk.libcommons.ShizukuHelper
 import com.rk.libcommons.child
-import com.rk.libcommons.createFileIfNot
 import com.rk.libcommons.localBinDir
 import com.rk.libcommons.localDir
 import com.rk.libcommons.localLibDir
 import com.rk.terminal.App.Companion.getTempDir
 import com.rk.terminal.BuildConfig
-import com.rk.settings.Settings
 import com.rk.terminal.ui.screens.settings.WorkingMode
 import com.termux.terminal.TerminalEmulator
 import com.termux.terminal.TerminalSession
@@ -37,44 +35,12 @@ object MkSession {
                 "EXTERNAL_STORAGE" to System.getenv("EXTERNAL_STORAGE")
             )
 
-            val workingDir = pendingCommand?.workingDir ?: alpineHomeDir().path
+            val workingDir = pendingCommand?.workingDir
+                ?: File("/sdcard").takeIf { it.canRead() }?.path
+                ?: localDir().path
 
-            val useChroot = Rootfs.execMode.value == ExecMode.CHROOT
-
-            val initFile: File = localBinDir().child("init-host")
-            if (initFile.exists().not()) {
-                initFile.createFileIfNot()
-                assets.open("init-host.sh").bufferedReader().use { it.readText() }.let {
-                    initFile.writeText(it)
-                }
-            }
-
-            val initChrootFile: File = localBinDir().child("init-host-chroot")
-            if (useChroot && initChrootFile.exists().not()) {
-                initChrootFile.createFileIfNot()
-                assets.open("init-host-chroot.sh").bufferedReader().use { it.readText() }.let {
-                    initChrootFile.writeText(it)
-                }
-            }
-
-            localBinDir().child("init").apply {
-                if (exists().not()) {
-                    createFileIfNot()
-                    assets.open("init.sh").bufferedReader().use { it.readText() }.let {
-                        writeText(it)
-                    }
-                }
-            }
-
-            localBinDir().child("rm").apply {
-                if (exists().not()) {
-                    createFileIfNot()
-                    assets.open("rm-wrapper.sh").bufferedReader().use { it.readText() }.let {
-                        writeText(it)
-                    }
-                    setExecutable(true)
-                }
-            }
+            ShizukuHelper.installRish(this)
+            val rish = ShizukuHelper.rishFile(this)
 
             val env = mutableListOf(
                 "PATH=${System.getenv("PATH")}:/sbin:${localBinDir().absolutePath}",
@@ -87,38 +53,14 @@ object MkSession {
                 "DEBUG=${BuildConfig.DEBUG}",
                 "PREFIX=${filesDir.parentFile!!.path}",
                 "LD_LIBRARY_PATH=${localLibDir().absolutePath}",
-                "LINKER=${if (File("/system/bin/linker64").exists()) "/system/bin/linker64" else "/system/bin/linker"}",
                 "NATIVE_LIB_DIR=${applicationInfo.nativeLibraryDir}",
                 "PKG=${packageName}",
                 "RISH_APPLICATION_ID=${packageName}",
                 "PKG_PATH=${applicationInfo.sourceDir}",
-                "PROOT_TMP_DIR=${getTempDir(this).child(sessionId).also { if (it.exists().not()) it.mkdirs() }}",
                 "TMPDIR=${getTempDir(this).absolutePath}",
-                "PROOT_LOADER=${applicationInfo.nativeLibraryDir}/libloader.so",
-                "PROOT=${applicationInfo.nativeLibraryDir}/libproot.so",
-                "CHROOT=${if (File("/system/bin/chroot").exists()) "/system/bin/chroot" else "/system/xbin/chroot"}",
-                "USE_CHROOT=${if (useChroot) "1" else "0"}",
-                "RETERM_LOGIN_SHELL=${Settings.login_shell}",
             )
 
-            val loader32 = "${applicationInfo.nativeLibraryDir}/libloader32.so"
-            if (File(loader32).exists()) {
-                env.add("PROOT_LOADER_32=$loader32")
-            }
-
             env.addAll(envVariables.map { "${it.key}=${it.value}" })
-
-            localDir().child("stat").apply {
-                if (exists().not()) {
-                    writeText(TerminalUtils.stat)
-                }
-            }
-
-            localDir().child("vmstat").apply {
-                if (exists().not()) {
-                    writeText(TerminalUtils.vmstat)
-                }
-            }
 
             pendingCommand?.env?.let {
                 env.addAll(it)
@@ -126,9 +68,8 @@ object MkSession {
 
             val args: Array<String>
             val shell = if (pendingCommand == null) {
-                args = if (workingMode == WorkingMode.ALPINE) {
-                    val targetInit = if (useChroot) initChrootFile else initFile
-                    arrayOf("-c",targetInit.absolutePath)
+                args = if (workingMode == WorkingMode.SHIZUKU) {
+                    arrayOf(rish.absolutePath)
                 } else {
                     arrayOf()
                 }
@@ -151,31 +92,11 @@ object MkSession {
 
     fun buildCustomPendingCommand(context: Context, custom: CustomSession): PendingCommand {
         val scriptFile = File(custom.shellPath)
-        val sysSh = File("/system/bin/sh")
-
-        val shell: String
-        val args: Array<String>
-
-        if (sysSh.canExecute()) {
-            shell = sysSh.absolutePath
-            args = arrayOf("-c", scriptFile.absolutePath)
-        } else {
-            val proot = "${context.applicationInfo.nativeLibraryDir}/libproot.so"
-            shell = proot
-            args = arrayOf(
-                "-r", "/",
-                "-b", "/dev",
-                "-b", "/proc",
-                "-b", "/sdcard",
-                "-0",
-                "sh", scriptFile.absolutePath
-            )
-        }
 
         return PendingCommand(
-            shell = shell,
-            args = args,
-            workingDir = scriptFile.parentFile?.absolutePath ?: "/sdcard/ReTerminal",
+            shell = "/system/bin/sh",
+            args = arrayOf("-c", scriptFile.absolutePath),
+            workingDir = scriptFile.parentFile?.absolutePath ?: "/sdcard/ShellTerminal",
             env = null
         )
     }
@@ -188,36 +109,22 @@ object MkSession {
     ): PendingCommand {
         val workingDir = script.parentFile?.absolutePath
         return if (custom != null) {
-            val sysSh = File("/system/bin/sh")
-            if (sysSh.canExecute()) {
-                PendingCommand(
-                    shell = sysSh.absolutePath,
-                    args = arrayOf("-c", "'${custom.shellPath}' '${script.absolutePath}'"),
-                    workingDir = workingDir,
-                    env = null
-                )
-            } else {
-                val proot = "${context.applicationInfo.nativeLibraryDir}/libproot.so"
-                PendingCommand(
-                    shell = proot,
-                    args = arrayOf(
-                        "-r", "/",
-                        "-b", "/dev",
-                        "-b", "/proc",
-                        "-b", "/sdcard",
-                        "-0",
-                        "sh", custom.shellPath, script.absolutePath
-                    ),
-                    workingDir = workingDir,
-                    env = null
-                )
-            }
-        } else if (workingMode == WorkingMode.ALPINE) {
-            val initFile = context.localBinDir()
-                .child(if (Rootfs.execMode.value == ExecMode.CHROOT) "init-host-chroot" else "init-host")
             PendingCommand(
                 shell = "/system/bin/sh",
-                args = arrayOf("-c",initFile.absolutePath,"sh",script.absolutePath),
+                args = arrayOf("-c", "'${custom.shellPath}' '${script.absolutePath}'"),
+                workingDir = workingDir,
+                env = null
+            )
+        } else if (workingMode == WorkingMode.SHIZUKU) {
+            // the script lives in app-private storage which the shell user cannot read, so rish gets its content as -c
+            ShizukuHelper.installRish(context)
+            PendingCommand(
+                shell = "/system/bin/sh",
+                args = arrayOf(
+                    "-c", "exec sh \"\$0\" -c \"\$(cat \"\$1\")\"",
+                    ShizukuHelper.rishFile(context).absolutePath,
+                    script.absolutePath
+                ),
                 workingDir = workingDir,
                 env = null
             )

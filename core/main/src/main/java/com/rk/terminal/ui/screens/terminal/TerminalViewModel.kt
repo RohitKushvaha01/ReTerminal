@@ -56,7 +56,7 @@ class TerminalViewModel : ViewModel() {
                 val custom = if (sessionId == service.currentSession.value.first) service.currentCustomSession else null
                 if (custom != null) {
                     val pendingCommand = MkSession.buildCustomPendingCommand(context, custom)
-                    sessionBinder.createSession(sessionId, client, WorkingMode.ALPINE, pendingCommand)
+                    sessionBinder.createSession(sessionId, client, WorkingMode.SHIZUKU, pendingCommand)
                 } else {
                     sessionBinder.createSession(sessionId, client, Settings.working_Mode)
                 }

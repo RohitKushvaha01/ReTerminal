@@ -33,10 +33,9 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "ReTerminal"
+rootProject.name = "ShellTerminal"
 include(":app")
 include(":core:main")
 
 include(":core:components")
 include(":core:resources")
-include(":core:proot")

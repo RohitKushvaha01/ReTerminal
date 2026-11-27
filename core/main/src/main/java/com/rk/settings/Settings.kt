@@ -8,13 +8,9 @@ import androidx.appcompat.app.AppCompatDelegate
 import com.rk.libcommons.application
 import com.rk.terminal.ui.screens.settings.WorkingMode
 import com.rk.terminal.ui.screens.settings.InputMode
-import com.rk.terminal.ui.screens.settings.LoginShell
 
 object Settings {
     //Boolean
-    var seccomp
-        get() = Preference.getBoolean(key = "seccomp", default = false)
-        set(value) = Preference.setBoolean(key = "seccomp",value)
     var amoled
         get() = Preference.getBoolean(key = "oled", default = false)
         set(value) = Preference.setBoolean(key = "oled",value)
@@ -84,20 +80,12 @@ object Settings {
         set(value) = Preference.setFloat(key = "wallTransparency",value)
 
     var working_Mode
-        get() = Preference.getInt(key = "workingMode", default = WorkingMode.ALPINE)
+        get() = Preference.getInt(key = "workingMode", default = WorkingMode.SHIZUKU)
         set(value) = Preference.setInt(key = "workingMode",value)
 
     var input_mode
         get() = Preference.getInt(key = "input_mode", default = InputMode.DEFAULT)
         set(value) = Preference.setInt(key = "input_mode", value)
-
-    var exec_mode
-        get() = Preference.getInt(key = "exec_mode", default = -1)
-        set(value) = Preference.setInt(key = "exec_mode", value)
-
-    var login_shell
-        get() = Preference.getInt(key = "login_shell", default = LoginShell.DISTRO)
-        set(value) = Preference.setInt(key = "login_shell", value)
 
     var default_is_custom
         get() = Preference.getBoolean(key = "default_is_custom", default = false)

@@ -24,7 +24,7 @@ fun CustomSessionDialog(
     onSave: (name: String, shellPath: String) -> Unit
 ) {
     var name by remember { mutableStateOf("") }
-    var shellPath by remember { mutableStateOf("/sdcard/ReTerminal/") }
+    var shellPath by remember { mutableStateOf("/sdcard/ShellTerminal/") }
     var errorMessage by remember { mutableStateOf<String?>(null) }
 
     fun validate(): String? {

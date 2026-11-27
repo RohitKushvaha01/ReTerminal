@@ -7,7 +7,7 @@ curl -LO https://bitbucket.org/iBotPeaches/apktool/downloads/apktool_2.11.0.jar
 mv apktool_2.11.0.jar apktool.jar
 curl -LO https://raw.githubusercontent.com/daniellockyer/apkdiff/refs/heads/master/apkdiff.py
 
-REPO="RohitKushvaha01/ReTerminal"
+REPO="venxsa/ShellTerminal"
 RELEASE_FILE="release.apk"
 
 LATEST_RELEASE_URL="https://github.com/$REPO/releases/latest"

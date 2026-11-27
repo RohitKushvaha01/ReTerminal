@@ -1,0 +1,58 @@
+name: Build
+on:
+  push:
+    branches: [main, dev]
+    paths-ignore: ['**/*.md']
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build APK
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: gradle
+
+      - name: Accept Android SDK licenses
+        run: yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses || true
+
+      - name: Fetch rish (shell via Shizuku)
+        run: scripts/fetch-rish.sh
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+
+      - name: Prepare signing (falls back to the test key without secrets)
+        env:
+          KEYSTORE: ${{ secrets.KEYSTORE }}
+          PROP: ${{ secrets.PROP }}
+        run: |
+          if [ -n "$KEYSTORE" ] && [ -n "$PROP" ]; then
+            echo "$KEYSTORE" | base64 -d > /tmp/xed.keystore
+            echo "$PROP" | base64 -d > /tmp/signing.properties
+          else
+            touch /tmp/xed.keystore /tmp/signing.properties
+          fi
+
+      - name: Build
+        run: |
+          chmod +x gradlew
+          ./gradlew assembleRelease
+          VERSION=$(grep '^VERSION_NAME=' version.properties | cut -d= -f2)
+          mv app/build/outputs/apk/release/*.apk "ShellTerminal-v$VERSION-$(git rev-parse --short HEAD).apk"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ShellTerminal-apk
+          path: ShellTerminal-*.apk
+
+      - name: Cleanup signing files
+        if: always()
+        run: rm -f /tmp/xed.keystore /tmp/signing.properties

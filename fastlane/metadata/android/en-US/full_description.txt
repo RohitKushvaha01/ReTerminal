@@ -1,1 +1,1 @@
-<p>ReTerminal is a sleek, Material 3-inspired terminal emulator designed as a modern alternative to the legacy Jackpal Terminal. Built on Termux's robust TerminalView</p>
+<p>ShellTerminal is a sleek, Material 3-inspired terminal emulator with a Shizuku-powered shell. Built on Termux's robust TerminalView</p>

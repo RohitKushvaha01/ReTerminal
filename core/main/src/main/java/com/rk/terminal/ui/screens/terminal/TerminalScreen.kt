@@ -101,7 +101,7 @@ fun TerminalScreen(
                 val terminal = terminalViewModel.terminalView ?: return@AddSessionDialog
                 val client = TerminalBackEnd(terminal, mainActivity)
                 val pendingCommand = MkSession.buildCustomPendingCommand(context, custom)
-                sessionBinder.createSession(custom.name, client, WorkingMode.ALPINE, pendingCommand)
+                sessionBinder.createSession(custom.name, client, WorkingMode.SHIZUKU, pendingCommand)
                 terminalViewModel.changeSession(context, sessionBinder, custom.name)
                 showAddDialog = false
             }
@@ -192,9 +192,9 @@ private fun AddSessionDialog(
     BasicAlertDialog(onDismissRequest = onDismiss) {
         PreferenceGroup {
             SettingsCard(
-                title = { Text("Alpine") },
-                description = { Text(stringResource(strings.alpine_desc)) },
-                onClick = { onCreateSession(WorkingMode.ALPINE) }
+                title = { Text("Shizuku") },
+                description = { Text(stringResource(strings.shizuku_desc)) },
+                onClick = { onCreateSession(WorkingMode.SHIZUKU) }
             )
             SettingsCard(
                 title = { Text("Android") },

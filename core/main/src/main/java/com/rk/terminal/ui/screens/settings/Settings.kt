@@ -28,8 +28,6 @@ import com.rk.terminal.ui.activities.terminal.MainActivity
 import com.rk.terminal.ui.components.SettingsToggle
 import com.rk.terminal.ui.routes.MainActivityRoutes
 import com.rk.terminal.ui.screens.terminal.CustomSessions
-import com.rk.terminal.ui.screens.terminal.ExecMode
-import com.rk.terminal.ui.screens.terminal.Rootfs
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -63,7 +61,7 @@ fun SettingsCard(
 }
 
 object WorkingMode {
-    const val ALPINE = 0
+    const val SHIZUKU = 0
     const val ANDROID = 1
 }
 
@@ -71,13 +69,6 @@ object InputMode {
     const val DEFAULT = 0
     const val TYPE_NULL = 1
     const val VISIBLE_PASSWORD = 2
-}
-
-object LoginShell {
-    const val DISTRO = 0
-    const val BASH = 1
-    const val SH = 2
-    const val ASH = 3
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -90,8 +81,6 @@ fun Settings(
     val context = LocalContext.current
     var selectedWorkingMode by remember { mutableIntStateOf(Settings.working_Mode) }
     var selectedInputMode by remember { mutableIntStateOf(Settings.input_mode) }
-    var selectedLoginShell by remember { mutableIntStateOf(Settings.login_shell) }
-    var selectedExecMode by remember { mutableStateOf(Rootfs.execMode.value) }
     var customSessions by remember { mutableStateOf(CustomSessions.getAll()) }
     var showAddCustomSession by remember { mutableStateOf(false) }
     var defaultIsCustom by remember { mutableStateOf(Settings.default_is_custom) }
@@ -104,14 +93,14 @@ fun Settings(
     ) {
         PreferenceGroup(heading = stringResource(strings.default_working_mode)) {
             WorkingModeOption(
-                title = "Alpine",
-                description = stringResource(strings.alpine_desc),
-                selected = !defaultIsCustom && selectedWorkingMode == WorkingMode.ALPINE
+                title = "Shizuku",
+                description = stringResource(strings.shizuku_desc),
+                selected = !defaultIsCustom && selectedWorkingMode == WorkingMode.SHIZUKU
             ) {
                 defaultIsCustom = false
                 Settings.default_is_custom = false
-                selectedWorkingMode = WorkingMode.ALPINE
-                Settings.working_Mode = WorkingMode.ALPINE
+                selectedWorkingMode = WorkingMode.SHIZUKU
+                Settings.working_Mode = WorkingMode.SHIZUKU
             }
             WorkingModeOption(
                 title = "Android",
@@ -134,56 +123,6 @@ fun Settings(
                     Settings.default_is_custom = true
                     CustomSessions.setDefault(session.id)
                 }
-            }
-        }
-
-        PreferenceGroup(heading = "Execution Mode") {
-            ExecModeOption("Chroot", "Requires root, faster, real bind mounts", ExecMode.CHROOT, selectedExecMode) {
-                selectedExecMode = it
-                Rootfs.setExecMode(it)
-            }
-            ExecModeOption("Proot", "No root required, slightly slower", ExecMode.PROOT, selectedExecMode) {
-                selectedExecMode = it
-                Rootfs.setExecMode(it)
-            }
-        }
-
-        PreferenceGroup(heading = "Login Shell") {
-            LoginShellOption(
-                title = "Distro default",
-                description = "ash on Alpine, sh on Wolfi",
-                mode = LoginShell.DISTRO,
-                currentMode = selectedLoginShell
-            ) {
-                selectedLoginShell = it
-                Settings.login_shell = it
-            }
-            LoginShellOption(
-                title = "bash",
-                description = "/bin/bash (runs apk add bash if missing)",
-                mode = LoginShell.BASH,
-                currentMode = selectedLoginShell
-            ) {
-                selectedLoginShell = it
-                Settings.login_shell = it
-            }
-            LoginShellOption(
-                title = "sh",
-                description = "/bin/sh",
-                mode = LoginShell.SH,
-                currentMode = selectedLoginShell
-            ) {
-                selectedLoginShell = it
-                Settings.login_shell = it
-            }
-            LoginShellOption(
-                title = "ash",
-                description = "/bin/ash",
-                mode = LoginShell.ASH,
-                currentMode = selectedLoginShell
-            ) {
-                selectedLoginShell = it
-                Settings.login_shell = it
             }
         }
 
@@ -249,14 +188,6 @@ fun Settings(
 
         PreferenceGroup {
             SettingsToggle(
-                label = stringResource(strings.seccomp),
-                description = stringResource(strings.seccomp_desc),
-                showSwitch = true,
-                default = Settings.seccomp,
-                sideEffect = { Settings.seccomp = it }
-            )
-
-            SettingsToggle(
                 label = stringResource(strings.all_file_access),
                 description = stringResource(strings.all_file_access_desc),
                 showSwitch = false,
@@ -309,38 +240,6 @@ private fun WorkingModeOption(title: String, description: String, selected: Bool
 
 @Composable
 private fun InputModeOption(title: String, description: String, mode: Int, currentMode: Int, onSelect: (Int) -> Unit) {
-    SettingsCard(
-        title = { Text(title) },
-        description = { Text(description) },
-        startWidget = {
-            RadioButton(
-                modifier = Modifier.padding(start = 8.dp),
-                selected = currentMode == mode,
-                onClick = { onSelect(mode) }
-            )
-        },
-        onClick = { onSelect(mode) }
-    )
-}
-
-@Composable
-private fun ExecModeOption(title: String, description: String, mode: ExecMode, currentMode: ExecMode?, onSelect: (ExecMode) -> Unit) {
-    SettingsCard(
-        title = { Text(title) },
-        description = { Text(description) },
-        startWidget = {
-            RadioButton(
-                modifier = Modifier.padding(start = 8.dp),
-                selected = currentMode == mode,
-                onClick = { onSelect(mode) }
-            )
-        },
-        onClick = { onSelect(mode) }
-    )
-}
-
-@Composable
-private fun LoginShellOption(title: String, description: String, mode: Int, currentMode: Int, onSelect: (Int) -> Unit) {
     SettingsCard(
         title = { Text(title) },
         description = { Text(description) },

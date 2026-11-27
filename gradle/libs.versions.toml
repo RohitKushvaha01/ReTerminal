@@ -68,6 +68,7 @@ gson = "2.13.2"
 semver = "3.1.0"
 leakcanary = "2.14"
 motionCompose = "2.0.1"
+shizuku = "13.1.5"
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
@@ -156,6 +157,10 @@ leakcanary = { module = "com.squareup.leakcanary:leakcanary-android", version.re
 androidx-benchmark-macro-junit4 = { module = "androidx.benchmark:benchmark-macro-junit4", version.ref = "benchmark" }
 androidx-benchmark-junit4 = { module = "androidx.benchmark:benchmark-junit4", version.ref = "benchmark" }
 androidx-profileinstaller = { module = "androidx.profileinstaller:profileinstaller", version.ref = "profileinstaller" }
+
+# Shizuku
+shizuku-api = { module = "dev.rikka.shizuku:api", version.ref = "shizuku" }
+shizuku-provider = { module = "dev.rikka.shizuku:provider", version.ref = "shizuku" }
 
 # Misc
 material = { module = "com.google.android.material:material", version.ref = "material" }

@@ -24,6 +24,7 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.rk.libcommons.ShizukuHelper
 import com.rk.libcommons.child
 import com.rk.libcommons.localDir
 import com.rk.terminal.ui.navHosts.MainActivityNavHost
@@ -61,6 +62,7 @@ class MainActivity : ComponentActivity() {
         ThemeManager.apply(this)
         enableEdgeToEdge()
         requestPermission()
+        ShizukuHelper.watch()
 
         if (intent.hasExtra("awake_intent")) {
             moveTaskToBack(true)

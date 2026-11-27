@@ -67,7 +67,7 @@ object CustomSessions {
             val id = getDefaultId()
             val session = id?.let { getById(it) }
             if (session != null) {
-                WorkingMode.ALPINE to session
+                WorkingMode.SHIZUKU to session
             } else {
                 Settings.default_is_custom = false
                 Settings.working_Mode to null

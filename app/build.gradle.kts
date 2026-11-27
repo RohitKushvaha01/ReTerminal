@@ -1,5 +1,14 @@
 import java.util.Properties
 
+// Single source of truth for the version: version.properties (bumped by scripts/release.sh / the Release workflow)
+val versionProps = Properties().apply {
+    rootProject.file("version.properties").inputStream().use { load(it) }
+}
+val appVersionName: String = versionProps.getProperty("VERSION_NAME")
+val appVersionCode: Int = appVersionName.split(".").map { it.toInt() }.let { (major, minor, patch) ->
+    major * 10000 + minor * 100 + patch
+}
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
@@ -23,7 +32,7 @@ android {
             val propertiesFilePath = if (isGITHUB_ACTION) {
                 "/tmp/signing.properties"
             } else {
-                "/home/rohit/Android/xed-signing/signing.properties"
+                rootProject.file("signing.properties").path
             }
             
             val propertiesFile = File(propertiesFilePath)
@@ -87,22 +96,22 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro"
             )
             signingConfig = signingConfigs.getByName("release")
-            resValue("string","app_name","ReTerminal")
+            resValue("string","app_name","ShellTerminal")
         }
         debug{
             applicationIdSuffix = ".debug"
             versionNameSuffix = "-DEBUG"
-            resValue("string","app_name","ReTerminal-Debug")
+            resValue("string","app_name","ShellTerminal-Debug")
         }
     }
 
     
     defaultConfig {
-        applicationId = "com.rk.terminal"
+        applicationId = "com.venxsa.shellterminal"
         minSdk = 26
         targetSdk = 37
-        versionCode = 10
-        versionName = "1.3.0"
+        versionCode = appVersionCode
+        versionName = appVersionName
         vectorDrawables {
             useSupportLibrary = true
         }

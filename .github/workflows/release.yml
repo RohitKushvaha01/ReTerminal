@@ -1,0 +1,87 @@
+name: Release
+on:
+  workflow_dispatch:
+    inputs:
+      bump:
+        description: 'Version bump (patch 1.0.1 -> 1.0.2, minor, major) or an explicit X.Y.Z'
+        required: true
+        default: patch
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Build and publish
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Resolve version
+        id: v
+        env:
+          BUMP: ${{ inputs.bump }}
+        run: |
+          if [ "${GITHUB_REF_TYPE}" = "tag" ]; then
+            VERSION="${GITHUB_REF_NAME#v}"
+            printf 'VERSION_NAME=%s\n' "$VERSION" > version.properties
+          else
+            chmod +x scripts/bump-version.sh
+            VERSION=$(scripts/bump-version.sh "$BUMP")
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add version.properties
+            git commit -m "chore(release): v$VERSION"
+            git tag -a "v$VERSION" -m "ShellTerminal v$VERSION"
+            git push origin "HEAD:${GITHUB_REF_NAME}" "v$VERSION"
+          fi
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: gradle
+
+      - name: Accept Android SDK licenses
+        run: yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses || true
+
+      - name: Fetch rish (shell via Shizuku)
+        run: scripts/fetch-rish.sh
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+
+      - name: Prepare signing (falls back to the test key without secrets)
+        env:
+          KEYSTORE: ${{ secrets.KEYSTORE }}
+          PROP: ${{ secrets.PROP }}
+        run: |
+          if [ -n "$KEYSTORE" ] && [ -n "$PROP" ]; then
+            echo "$KEYSTORE" | base64 -d > /tmp/xed.keystore
+            echo "$PROP" | base64 -d > /tmp/signing.properties
+          else
+            touch /tmp/xed.keystore /tmp/signing.properties
+          fi
+
+      - name: Build release APK
+        run: |
+          chmod +x gradlew
+          ./gradlew assembleRelease
+          mv app/build/outputs/apk/release/*.apk "ShellTerminal-v${{ steps.v.outputs.version }}.apk"
+
+      - name: Publish GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "v${{ steps.v.outputs.version }}" \
+            "ShellTerminal-v${{ steps.v.outputs.version }}.apk" \
+            --title "ShellTerminal v${{ steps.v.outputs.version }}" \
+            --generate-notes
+
+      - name: Cleanup signing files
+        if: always()
+        run: rm -f /tmp/xed.keystore /tmp/signing.properties

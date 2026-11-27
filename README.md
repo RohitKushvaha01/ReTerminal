@@ -1,20 +1,29 @@
-# Looking for contributors
-I currently don't have enough time to actively maintain ReTerminal.
-If you're interested in keeping the project alive, contributions are very welcome!
+# ShellTerminal
+**ShellTerminal** is a sleek, Material 3-inspired terminal emulator that gives you a shell with **Shizuku** (adb-level) privileges, or a plain Android shell. Built on [Termux's](https://github.com/termux/termux-app) robust TerminalView.
 
-
-
-# ReTerminal
-**ReTerminal** is a sleek, Material 3-inspired terminal emulator designed as a modern alternative to the legacy [Jackpal Terminal](https://github.com/jackpal/Android-Terminal-Emulator). Built on [Termux's](https://github.com/termux/termux-app) robust TerminalView
-
-Download the latest APK from the [Releases Section](https://github.com/RohitKushvaha01/ReTerminal/releases/latest).
+Download the latest APK from the [Releases Section](https://github.com/venxsa/ShellTerminal/releases/latest).
 
 # Features
 - [x] Basic Terminal
 - [x] Virtual Keys
 - [x] Multiple Sessions
-- [x] Alpine Linux support
+- [x] Shell via Shizuku (rish)
 - [x] Configurable Keyboard Shortcuts (Paste, Session Management)
+
+# Requirements
+[Shizuku](https://github.com/RikkaApps/Shizuku) must be running; ShellTerminal asks for its permission on start.
+
+# Building
+```sh
+scripts/build.sh            # -> out/ShellTerminal-v<version>.apk
+```
+`scripts/fetch-rish.sh` downloads the official `rish` files from the Shizuku release (done automatically by build.sh and CI).
+
+# Releasing
+- Locally: `scripts/release.sh` (bumps patch 1.0.1 -> 1.0.2, tags, pushes; `minor`, `major` or `X.Y.Z` also work).
+- On GitHub: Actions -> **Release** -> Run workflow (same bump, builds and publishes the APK).
+
+The version lives in `version.properties`. Optional signing secrets: `KEYSTORE` and `PROP` (base64); without them the test key is used.
 
 # Screenshots
 <div>
@@ -23,7 +32,4 @@ Download the latest APK from the [Releases Section](https://github.com/RohitKush
   <img src="/fastlane/metadata/android/en-US/images/phoneScreenshots/03.jpg" width="32%" />
 </div>
 
-## Community
-> [!TIP]
-Join the reTerminal community to stay updated and engage with other users:
-- [Telegram](https://t.me/reTerminal)
+Based on [ReTerminal](https://github.com/RohitKushvaha01/ReTerminal).

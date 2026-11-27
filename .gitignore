@@ -20,3 +20,9 @@ Todo.md
 **/build
 .vscode
 core/wasm3
+
+# signing + fetched rish (see scripts/fetch-rish.sh)
+/signing.properties
+/out/
+core/main/src/main/assets/rish
+core/main/src/main/assets/rish_shizuku.dex
